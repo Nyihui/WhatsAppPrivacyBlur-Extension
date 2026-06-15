@@ -37,14 +37,6 @@ function buildCSS(settings) {
       ? settings[rule.key]
       : DEFAULT_SETTINGS[rule.key];
 
-    // --- Special: No Transition Delay ---
-    if (rule.special === 'noTransition') {
-      if (isActive) {
-        css += `${ROOT} * { transition: none !important; }\n`;
-      }
-      continue;
-    }
-
     // --- Special: Unblur Override (Injected once manually below loop) ---
 
 
@@ -60,6 +52,10 @@ function buildCSS(settings) {
       const opacityTransition = settings.noTransition
         ? 'transition: none !important;'
         : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+
+      const hoverOpacityTransition = settings.noTransition
+        ? 'transition-property: opacity !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
+        : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
         
       css += `
       ${blurSelectors} {
@@ -68,6 +64,7 @@ function buildCSS(settings) {
       }
       ${hoverSelectors} {
         opacity: 1 !important;
+        ${hoverOpacityTransition}
       }`;
       continue;
     }
@@ -82,13 +79,18 @@ function buildCSS(settings) {
       ? 'transition: none !important;'
       : 'transition-property: filter !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
 
+    const hoverFilterTransition = settings.noTransition
+      ? 'transition-property: filter !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
+      : 'transition-property: filter !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
+
     css += `
     ${blurSelectors} {
       filter: blur(${blurValue}) !important;
       ${filterTransition}
     }
     ${hoverSelectors} {
-      filter: blur(0px) !important;
+      filter: none !important;
+      ${hoverFilterTransition}
     }`;
 
     // --- hoverParentTargets: blur a child, unblur when PARENT is hovered ---
@@ -102,7 +104,8 @@ function buildCSS(settings) {
           ${filterTransition}
         }
         ${childHover} {
-          filter: blur(0px) !important;
+          filter: none !important;
+          ${hoverFilterTransition}
         }`;
       }
     }
@@ -120,7 +123,8 @@ function buildCSS(settings) {
           ${filterTransition}
         }
         ${childHover} {
-          filter: blur(0px) !important;
+          filter: none !important;
+          ${hoverFilterTransition}
         }`;
       }
     }
