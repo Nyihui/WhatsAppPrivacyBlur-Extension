@@ -81,13 +81,14 @@
 
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
     const modeLiteBtn = shadow.getElementById('fab-mode-lite');
+    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
     const blurIntensityWrapper = shadow.getElementById('fab-blur-intensity-wrapper');
     const rowUnblur = shadow.getElementById('row-fab-toggle-unblur-last-n');
     const rowNoTrans = shadow.getElementById('row-fab-toggle-no-transition');
 
-    if (modeBlurBtn && modeLiteBtn && blurIntensityWrapper) {
+    if (modeBlurBtn && modeLiteBtn && modeRedactedBtn && blurIntensityWrapper) {
       // Reset all buttons to inactive first
-      [modeBlurBtn, modeLiteBtn].forEach(btn => {
+      [modeBlurBtn, modeLiteBtn, modeRedactedBtn].forEach(btn => {
         btn.style.background = 'transparent';
         btn.style.color = 'var(--md-on-s-var)';
         btn.style.borderColor = 'var(--md-outline)';
@@ -96,13 +97,14 @@
       // Highlight active button
       let activeBtn = modeBlurBtn;
       if (privacyMode === 'lite') activeBtn = modeLiteBtn;
+      else if (privacyMode === 'redacted') activeBtn = modeRedactedBtn;
 
       activeBtn.style.background = 'var(--md-primary-dim)';
       activeBtn.style.color = 'var(--md-primary)';
       activeBtn.style.borderColor = 'var(--md-primary)';
 
-      // Blur slider is always visible since both modes use blur
-      blurIntensityWrapper.style.display = 'block';
+      // Blur slider is only hidden in Redacted mode (Lite still uses blur value)
+      blurIntensityWrapper.style.display = (privacyMode === 'redacted') ? 'none' : 'block';
 
       // Unblur and No-Trans toggles require JS/Animations, so hide them if not in Standard Blur mode
       if (rowUnblur) rowUnblur.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
@@ -300,12 +302,16 @@
     // ---- Privacy Mode Toggle ------------------------------------------------
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
     const modeLiteBtn = shadow.getElementById('fab-mode-lite');
-    if (modeBlurBtn && modeLiteBtn) {
+    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
+    if (modeBlurBtn && modeLiteBtn && modeRedactedBtn) {
       modeBlurBtn.addEventListener('click', () => {
         chrome.storage.local.set({ privacyMode: 'blur' });
       });
       modeLiteBtn.addEventListener('click', () => {
         chrome.storage.local.set({ privacyMode: 'lite' });
+      });
+      modeRedactedBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'redacted' });
       });
     }
 

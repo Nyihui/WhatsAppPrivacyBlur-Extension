@@ -71,7 +71,9 @@ function buildCSS(settings) {
     }
 
     // --- Filter/blur mode (everything else) ---
-    const isStatic = settings.privacyMode === 'lite'; // Lite kills JS & transitions
+    const isRedacted = settings.privacyMode === 'redacted';
+    const isLite = settings.privacyMode === 'lite';
+    const isStatic = isRedacted || isLite; // Lite and Redacted both kill JS & transitions
 
     const multiplier = rule.blurMultiplier || 1;
     const blurValue = multiplier === 1
@@ -86,16 +88,26 @@ function buildCSS(settings) {
       ? 'transition: none !important;'
       : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
 
+    const redactedCSS = `
+      filter: brightness(0) !important;
+      color: #000 !important;
+      background-color: #000 !important;
+    `;
+    const redactedHoverCSS = `
+      filter: none !important;
+      color: unset !important;
+      background-color: unset !important;
+    `;
     const blurCSS = `filter: blur(${blurValue}) !important;`;
     const blurHoverCSS = `filter: none !important;`;
 
     css += `
     ${blurSelectors} {
-      ${blurCSS}
+      ${isRedacted ? redactedCSS : blurCSS}
       ${filterTransition}
     }
     ${hoverSelectors} {
-      ${blurHoverCSS}
+      ${isRedacted ? redactedHoverCSS : blurHoverCSS}
       ${hoverFilterTransition}
     }`;
 
@@ -106,11 +118,11 @@ function buildCSS(settings) {
         const childHover = `${scope} ${hoverParent}:hover:not(.wa-unblur-override):not(.wa-unblur-override *) ${child}`;
         css += `
         ${childBlur} {
-          ${blurCSS}
+          ${isRedacted ? redactedCSS : blurCSS}
           ${filterTransition}
         }
         ${childHover} {
-          ${blurHoverCSS}
+          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
           ${hoverFilterTransition}
         }`;
       }
@@ -127,11 +139,11 @@ function buildCSS(settings) {
 
         css += `
         ${baseSelector}:not(.wa-js-hover-unblur) {
-          ${blurCSS}
+          ${isRedacted ? redactedCSS : blurCSS}
           ${filterTransition}
         }
         ${hoverSelector} {
-          ${blurHoverCSS}
+          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
           ${hoverFilterTransition}
         }`;
       }
