@@ -11,7 +11,7 @@ window.WA_PANEL_SHIELD_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0
    <span class="row-desc">${desc}</span>
 -------------------------------------------------------------------------- */
 function _fabRow(id, title, desc, svgPath) {
-  return `<div class="control-row">
+  return `<div class="control-row" id="row-${id}">
     <div class="row-left">
       <div class="icon-box">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none"
@@ -73,26 +73,26 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
     </div>
   </div>
 
-  <div class="info-text" style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 15px;">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
-    </svg>
-    <span>If scrolling feels laggy, switch to Redacted mode.</span>
+  <div class="card slider-card">
+    <div class="mode-toggle-group" style="display: flex; gap: 12px; padding: 10px 12px;">
+      <button type="button" class="mode-btn active" id="fab-mode-blur" style="flex:1; padding: 8px; border-radius: 6px; background: var(--md-primary-dim); color: var(--md-primary); border: 1px solid var(--md-primary); cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">Blur</button>
+      <button type="button" class="mode-btn" id="fab-mode-redacted" style="flex:1; padding: 8px; border-radius: 6px; background: transparent; color: var(--md-on-s-var); border: 1px solid var(--md-outline); cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">Redacted</button>
+    </div>
   </div>
 
-  <div class="card slider-card">
-    <div class="mode-toggle-group" style="display: flex; margin-bottom: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color);">
-      <button type="button" class="mode-btn active" id="fab-mode-blur" style="flex:1; padding: 6px; background: var(--bg-hover); color: var(--text-color); border: none; cursor: pointer; font-size: 0.75rem; font-weight: 500;">Blur</button>
-      <button type="button" class="mode-btn" id="fab-mode-redacted" style="flex:1; padding: 6px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-size: 0.75rem; font-weight: 500; border-left: 1px solid var(--border-color);">Redacted</button>
+  <div class="info-text" style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 15px; text-align: center;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+  <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+  </svg>
+  <span>If scrolling feels laggy, switch to Redacted mode.</span>
+  </div>
+  
+  <div class="card slider-card" id="fab-blur-intensity-wrapper">
+    <div class="slider-header">
+      <span class="slider-title">Blur Intensity</span>
+      <span class="slider-val" id="fab-blur-val">3px</span>
     </div>
-
-    <div id="fab-blur-intensity-wrapper">
-      <div class="slider-header">
-        <span class="slider-title">Blur Intensity</span>
-        <span class="slider-val" id="fab-blur-val">3px</span>
-      </div>
-      <input type="range" id="fab-blur-intensity" min="2" max="20" value="3" class="range-slider">
-    </div>
+    <input type="range" id="fab-blur-intensity" min="2" max="20" value="3" class="range-slider">
   </div>
 
   <div class="card section-card">
@@ -110,7 +110,7 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
     ${_fabRow('fab-toggle-text-chats', 'Message Texts & Descriptions', 'Text bubbles, captions, system notes',
         '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/>')}
 
-    <div class="control-row control-row--expandable">
+    <div class="control-row control-row--expandable" id="row-fab-toggle-unblur-last-n">
       <div class="row-main">
         <div class="row-left">
           <div class="icon-box">

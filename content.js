@@ -77,12 +77,12 @@ function buildCSS(settings) {
       ? 'var(--wa-blur-amount)'
       : `calc(var(--wa-blur-amount) * ${multiplier})`;
 
-    const filterTransition = settings.noTransition
+    const filterTransition = (settings.noTransition || isRedacted)
       ? 'transition: none !important;'
       : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
 
-    const hoverFilterTransition = settings.noTransition
-      ? 'transition-property: filter, color, background-color !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
+    const hoverFilterTransition = (settings.noTransition || isRedacted)
+      ? 'transition: none !important;'
       : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
 
     const redactedCSS = `
@@ -126,17 +126,20 @@ function buildCSS(settings) {
     }
 
     // --- hoverHasTargets: JS-Based hover unblur logic ---
-    // Generates CSS targeting the .wa-js-hover-unblur class applied by our global event listener
     if (rule.hoverHasTargets && rule.hoverHasTargets.length > 0) {
       for (const { ancestor, hoverTrigger, child } of rule.hoverHasTargets) {
         const childPart = child ? ` ${child}` : '';
         const baseSelector = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
+        const hoverSelector = isRedacted 
+            ? `${scope} ${ancestor}:hover:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`
+            : `${baseSelector}.wa-js-hover-unblur`;
+
         css += `
         ${baseSelector}:not(.wa-js-hover-unblur) {
           ${isRedacted ? redactedCSS : blurCSS}
           ${filterTransition}
         }
-        ${baseSelector}.wa-js-hover-unblur {
+        ${hoverSelector} {
           ${isRedacted ? redactedHoverCSS : blurHoverCSS}
           ${hoverFilterTransition}
         }`;
@@ -223,8 +226,9 @@ function manageUnblurObserver(settings) {
   const isEnabled = settings.enabled ?? DEFAULT_SETTINGS.enabled;
   const unblurLastN = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
   const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
+  const privacyMode = settings.privacyMode || 'blur';
 
-  currentUnblurN = (isEnabled && unblurLastN) ? unblurLastNCount : 0;
+  currentUnblurN = (isEnabled && unblurLastN && privacyMode !== 'redacted') ? unblurLastNCount : 0;
 
   if (currentUnblurN > 0) {
     applyUnblurLastN(); // Apply immediately

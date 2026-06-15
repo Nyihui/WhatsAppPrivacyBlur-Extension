@@ -75,27 +75,37 @@
     const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
     shadow.getElementById('fab-unblur-last-n-slider').value = unblurLastNCount;
     shadow.getElementById('fab-unblur-last-n-val').textContent = unblurLastNCount;
-    const unblurLastNEnabled = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
-    shadow.getElementById('fab-unblur-last-n-panel').style.display = unblurLastNEnabled ? '' : 'none';
-
     const privacyMode = settings.privacyMode || 'blur';
+    const unblurLastNEnabled = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
+    shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled && privacyMode !== 'redacted') ? '' : 'none';
+
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
     const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
     const blurIntensityWrapper = shadow.getElementById('fab-blur-intensity-wrapper');
+    const rowUnblur = shadow.getElementById('row-fab-toggle-unblur-last-n');
+    const rowNoTrans = shadow.getElementById('row-fab-toggle-no-transition');
 
     if (modeBlurBtn && modeRedactedBtn && blurIntensityWrapper) {
       if (privacyMode === 'redacted') {
-        modeRedactedBtn.style.background = 'var(--bg-hover)';
-        modeRedactedBtn.style.color = 'var(--text-color)';
+        modeRedactedBtn.style.background = 'var(--md-primary-dim)';
+        modeRedactedBtn.style.color = 'var(--md-primary)';
+        modeRedactedBtn.style.borderColor = 'var(--md-primary)';
         modeBlurBtn.style.background = 'transparent';
-        modeBlurBtn.style.color = 'var(--text-muted)';
+        modeBlurBtn.style.color = 'var(--md-on-s-var)';
+        modeBlurBtn.style.borderColor = 'var(--md-outline)';
         blurIntensityWrapper.style.display = 'none';
+        if (rowUnblur) rowUnblur.style.display = 'none';
+        if (rowNoTrans) rowNoTrans.style.display = 'none';
       } else {
-        modeBlurBtn.style.background = 'var(--bg-hover)';
-        modeBlurBtn.style.color = 'var(--text-color)';
+        modeBlurBtn.style.background = 'var(--md-primary-dim)';
+        modeBlurBtn.style.color = 'var(--md-primary)';
+        modeBlurBtn.style.borderColor = 'var(--md-primary)';
         modeRedactedBtn.style.background = 'transparent';
-        modeRedactedBtn.style.color = 'var(--text-muted)';
+        modeRedactedBtn.style.color = 'var(--md-on-s-var)';
+        modeRedactedBtn.style.borderColor = 'var(--md-outline)';
         blurIntensityWrapper.style.display = 'block';
+        if (rowUnblur) rowUnblur.style.display = 'flex';
+        if (rowNoTrans) rowNoTrans.style.display = 'flex';
       }
     }
   }
