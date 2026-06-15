@@ -57,11 +57,14 @@ function buildCSS(settings) {
 
     // --- Opacity mode (Text Input) ---
     if (rule.property === 'opacity') {
+      const opacityTransition = settings.noTransition
+        ? 'transition: none !important;'
+        : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+        
       css += `
       ${blurSelectors} {
         opacity: var(--wa-input-opacity) !important;
-        transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        will-change: opacity;
+        ${opacityTransition}
       }
       ${hoverSelectors} {
         opacity: 1 !important;
@@ -75,12 +78,14 @@ function buildCSS(settings) {
       ? 'var(--wa-blur-amount)'
       : `calc(var(--wa-blur-amount) * ${multiplier})`;
 
+    const filterTransition = settings.noTransition
+      ? 'transition: none !important;'
+      : 'transition-property: filter !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+
     css += `
     ${blurSelectors} {
       filter: blur(${blurValue}) !important;
-      transition: ${transition} !important;
-      will-change: filter;
-      transform: translateZ(0);
+      ${filterTransition}
     }
     ${hoverSelectors} {
       filter: blur(0px) !important;
@@ -94,9 +99,7 @@ function buildCSS(settings) {
         css += `
         ${childBlur} {
           filter: blur(${blurValue}) !important;
-          transition: ${transition} !important;
-          will-change: filter;
-          transform: translateZ(0);
+          ${filterTransition}
         }
         ${childHover} {
           filter: blur(0px) !important;
@@ -109,14 +112,12 @@ function buildCSS(settings) {
     if (rule.hoverHasTargets && rule.hoverHasTargets.length > 0) {
       for (const { ancestor, hoverTrigger, child } of rule.hoverHasTargets) {
         const childPart = child ? ` ${child}` : '';
-        const childBlur  = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
+        const childBlur = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
         const childHover = `${scope} ${ancestor}:has(${hoverTrigger}:hover):not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
         css += `
         ${childBlur} {
           filter: blur(${blurValue}) !important;
-          transition: ${transition} !important;
-          will-change: filter;
-          transform: translateZ(0);
+          ${filterTransition}
         }
         ${childHover} {
           filter: blur(0px) !important;
@@ -178,14 +179,14 @@ let unblurInterval = null;
 function applyUnblurLastN() {
   if (currentUnblurN <= 0) return;
   const messages = document.querySelectorAll(`
-    [data-testid="conversation-panel-wrapper"] [data-testid="conversation-panel-messages"] [data-testid="msg-container"],
-    [data-testid="conversation-panel-wrapper"] [data-testid="conversation-panel-messages"] [data-id*="grouped-sticker"]
+    [data-testid="msg-container"],
+    [data-id*="grouped-sticker"]
   `);
-  
+
   // Clean up existing overrides to avoid unnecessary DOM writes
   messages.forEach(el => {
     if (el.classList.contains('wa-unblur-override')) {
-       el.classList.remove('wa-unblur-override');
+      el.classList.remove('wa-unblur-override');
     }
   });
 

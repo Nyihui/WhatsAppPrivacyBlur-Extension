@@ -183,14 +183,8 @@
       if (!clb) return;
       if (isOpen) {
         setSafeSVG(clb, SVG_ACTIVE);
-        const isDark = document.body.classList.contains('dark');
-        const glowColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.6)';
-        clb.style.filter = `drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 0 4px ${glowColor})`;
-        clb.style.transform = 'scale(1.08)';
       } else {
         setSafeSVG(clb, SVG_INACTIVE);
-        clb.style.filter = 'drop-shadow(0 0 0px transparent)';
-        clb.style.transform = 'scale(1)';
       }
     }
 
@@ -358,6 +352,18 @@
     function injectChatlistBtn() {
       if (document.getElementById(CLB_ID)) return;
 
+      if (!document.getElementById('wa-privacy-clb-style')) {
+        const style = document.createElement('style');
+        style.id = 'wa-privacy-clb-style';
+        style.textContent = `
+          #${CLB_ID}:active {
+            transform: scale(0.85) !important;
+            opacity: 0.6;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
       const anchor = getMediaAnchor();
       if (!anchor) return;
       const { mediaWrapper, navContainer } = anchor;
@@ -374,7 +380,7 @@
         'width:40px', 'height:40px', 'border:none', 'border-radius:50%',
         'background:transparent', 'cursor:pointer', 'padding:0',
         `color:${getCLBColor()}`,
-        'transition:background .15s, color .2s, filter .3s cubic-bezier(0.4, 0, 0.2, 1), transform .3s cubic-bezier(0.4, 0, 0.2, 1)',
+        'transition:background .15s, color .2s, opacity .15s, transform .15s cubic-bezier(0.4, 0, 0.2, 1)',
         'flex-shrink:0',
       ].join(';');
 
