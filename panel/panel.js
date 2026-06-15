@@ -77,7 +77,7 @@
     shadow.getElementById('fab-unblur-last-n-val').textContent = unblurLastNCount;
     const privacyMode = settings.privacyMode || 'blur';
     const unblurLastNEnabled = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
-    shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled && privacyMode === 'blur') ? '' : 'none';
+    shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled) ? '' : 'none';
 
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
     const modeLiteBtn = shadow.getElementById('fab-mode-lite');
@@ -106,17 +106,19 @@
       // Blur slider is only hidden in Redacted mode (Lite still uses blur value)
       blurIntensityWrapper.style.display = (privacyMode === 'redacted') ? 'none' : 'block';
 
-      // Unblur and No-Trans toggles require JS/Animations, so hide them if not in Standard Blur mode
-      if (rowUnblur) rowUnblur.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
+      // Unblur toggle is now powered by the ultra-lightweight JS poller for all modes
+      if (rowUnblur) rowUnblur.style.display = 'flex';
+
+      // No-Trans toggle strictly requires JS/Animations, so hide if not in Standard Blur mode
       if (rowNoTrans) rowNoTrans.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
     }
   }
 
   function checkRTL() {
     return document.documentElement.dir === 'rtl' ||
-           document.body?.dir === 'rtl' ||
-           (document.body && window.getComputedStyle(document.body).direction === 'rtl') ||
-           window.getComputedStyle(document.documentElement).direction === 'rtl';
+      document.body?.dir === 'rtl' ||
+      (document.body && window.getComputedStyle(document.body).direction === 'rtl') ||
+      window.getComputedStyle(document.documentElement).direction === 'rtl';
   }
 
   /**
@@ -455,7 +457,7 @@
           'align-items:center',
           'transform:translateY(-50%) scale(0.95)',
           'transform-origin:left center',
-          'transition:transform 0.1s cubic-bezier(0, 0, 0.2, 1), opacity 0.1s cubic-bezier(0, 0, 0.2, 1)',
+          'transition:transform 0 cubic-bezier(0, 0, 0.2, 1), opacity 0 cubic-bezier(0, 0, 0.2, 1)',
           'font-family:inherit'
         ].join(';');
         document.body.appendChild(tooltip);

@@ -149,7 +149,6 @@ function buildCSS(settings) {
       }
     }
   }
-
   return css;
 }
 
@@ -231,7 +230,8 @@ function manageUnblurObserver(settings) {
   const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
   const privacyMode = settings.privacyMode || 'blur';
 
-  currentUnblurN = (isEnabled && unblurLastN && privacyMode === 'blur') ? unblurLastNCount : 0;
+  // We re-enable the ultra-lightweight JS poller for all modes.
+  currentUnblurN = (isEnabled && unblurLastN) ? unblurLastNCount : 0;
 
   if (currentUnblurN > 0) {
     applyUnblurLastN(); // Apply immediately
