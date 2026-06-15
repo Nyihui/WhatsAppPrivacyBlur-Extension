@@ -77,36 +77,36 @@
     shadow.getElementById('fab-unblur-last-n-val').textContent = unblurLastNCount;
     const privacyMode = settings.privacyMode || 'blur';
     const unblurLastNEnabled = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
-    shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled && privacyMode !== 'redacted') ? '' : 'none';
+    shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled && privacyMode === 'blur') ? '' : 'none';
 
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
-    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
+    const modeLiteBtn = shadow.getElementById('fab-mode-lite');
     const blurIntensityWrapper = shadow.getElementById('fab-blur-intensity-wrapper');
     const rowUnblur = shadow.getElementById('row-fab-toggle-unblur-last-n');
     const rowNoTrans = shadow.getElementById('row-fab-toggle-no-transition');
 
-    if (modeBlurBtn && modeRedactedBtn && blurIntensityWrapper) {
-      if (privacyMode === 'redacted') {
-        modeRedactedBtn.style.background = 'var(--md-primary-dim)';
-        modeRedactedBtn.style.color = 'var(--md-primary)';
-        modeRedactedBtn.style.borderColor = 'var(--md-primary)';
-        modeBlurBtn.style.background = 'transparent';
-        modeBlurBtn.style.color = 'var(--md-on-s-var)';
-        modeBlurBtn.style.borderColor = 'var(--md-outline)';
-        blurIntensityWrapper.style.display = 'none';
-        if (rowUnblur) rowUnblur.style.display = 'none';
-        if (rowNoTrans) rowNoTrans.style.display = 'none';
-      } else {
-        modeBlurBtn.style.background = 'var(--md-primary-dim)';
-        modeBlurBtn.style.color = 'var(--md-primary)';
-        modeBlurBtn.style.borderColor = 'var(--md-primary)';
-        modeRedactedBtn.style.background = 'transparent';
-        modeRedactedBtn.style.color = 'var(--md-on-s-var)';
-        modeRedactedBtn.style.borderColor = 'var(--md-outline)';
-        blurIntensityWrapper.style.display = 'block';
-        if (rowUnblur) rowUnblur.style.display = 'flex';
-        if (rowNoTrans) rowNoTrans.style.display = 'flex';
-      }
+    if (modeBlurBtn && modeLiteBtn && blurIntensityWrapper) {
+      // Reset all buttons to inactive first
+      [modeBlurBtn, modeLiteBtn].forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--md-on-s-var)';
+        btn.style.borderColor = 'var(--md-outline)';
+      });
+
+      // Highlight active button
+      let activeBtn = modeBlurBtn;
+      if (privacyMode === 'lite') activeBtn = modeLiteBtn;
+
+      activeBtn.style.background = 'var(--md-primary-dim)';
+      activeBtn.style.color = 'var(--md-primary)';
+      activeBtn.style.borderColor = 'var(--md-primary)';
+
+      // Blur slider is always visible since both modes use blur
+      blurIntensityWrapper.style.display = 'block';
+
+      // Unblur and No-Trans toggles require JS/Animations, so hide them if not in Standard Blur mode
+      if (rowUnblur) rowUnblur.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
+      if (rowNoTrans) rowNoTrans.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
     }
   }
 
@@ -299,13 +299,13 @@
 
     // ---- Privacy Mode Toggle ------------------------------------------------
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
-    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
-    if (modeBlurBtn && modeRedactedBtn) {
+    const modeLiteBtn = shadow.getElementById('fab-mode-lite');
+    if (modeBlurBtn && modeLiteBtn) {
       modeBlurBtn.addEventListener('click', () => {
         chrome.storage.local.set({ privacyMode: 'blur' });
       });
-      modeRedactedBtn.addEventListener('click', () => {
-        chrome.storage.local.set({ privacyMode: 'redacted' });
+      modeLiteBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'lite' });
       });
     }
 

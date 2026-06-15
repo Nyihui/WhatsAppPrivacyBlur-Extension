@@ -19,7 +19,7 @@ window.WA_BLUR_RULES.push({
     // -- '[data-testid*="list-item-"] [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
     //  Me Tab Drawer Sidebar
     '[data-testid="me-tab-drawer"] [data-testid="drawer-title-body"]',
-    '[data-testid="profile-drawer"] div:has( > [data-testid="pushname-section"]) > div:nth-child(2)',
+    'div:has( > [data-testid="pushname-section"]) > div:nth-child(2) > div > div:first-child',
     'div:has( > [data-testid="phone"]) > div',
     //  Status Sidebar
     // -- '[data-testid="status-row-cell"] [data-testid="cell-frame-title"]',
