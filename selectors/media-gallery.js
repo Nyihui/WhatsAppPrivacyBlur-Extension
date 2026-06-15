@@ -18,7 +18,7 @@ window.WA_BLUR_RULES.push({
   ],
   hoverHasTargets: [
     {
-      ancestor: 'div:has(button[data-testid="webtp-powered-by"]) div:has(> img)',
+      ancestor: 'div:has( > div > div > button[data-testid="webtp-powered-by"])',
       hoverTrigger: '> img',
       child: ''
     },

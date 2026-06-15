@@ -23,6 +23,7 @@
     inputOpacity: 30,
     unblurLastN: false,
     unblurLastNCount: 3,
+    privacyMode: 'blur',
   };
 
   const PANEL_W = 320;  // px — matches #wa-panel width in css.js
@@ -76,6 +77,27 @@
     shadow.getElementById('fab-unblur-last-n-val').textContent = unblurLastNCount;
     const unblurLastNEnabled = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
     shadow.getElementById('fab-unblur-last-n-panel').style.display = unblurLastNEnabled ? '' : 'none';
+
+    const privacyMode = settings.privacyMode || 'blur';
+    const modeBlurBtn = shadow.getElementById('fab-mode-blur');
+    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
+    const blurIntensityWrapper = shadow.getElementById('fab-blur-intensity-wrapper');
+
+    if (modeBlurBtn && modeRedactedBtn && blurIntensityWrapper) {
+      if (privacyMode === 'redacted') {
+        modeRedactedBtn.style.background = 'var(--bg-hover)';
+        modeRedactedBtn.style.color = 'var(--text-color)';
+        modeBlurBtn.style.background = 'transparent';
+        modeBlurBtn.style.color = 'var(--text-muted)';
+        blurIntensityWrapper.style.display = 'none';
+      } else {
+        modeBlurBtn.style.background = 'var(--bg-hover)';
+        modeBlurBtn.style.color = 'var(--text-color)';
+        modeRedactedBtn.style.background = 'transparent';
+        modeRedactedBtn.style.color = 'var(--text-muted)';
+        blurIntensityWrapper.style.display = 'block';
+      }
+    }
   }
 
   function checkRTL() {
@@ -264,6 +286,18 @@
       unblurLastNValEl.textContent = this.value;
       chrome.storage.local.set({ unblurLastNCount: parseInt(this.value, 10) });
     });
+
+    // ---- Privacy Mode Toggle ------------------------------------------------
+    const modeBlurBtn = shadow.getElementById('fab-mode-blur');
+    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
+    if (modeBlurBtn && modeRedactedBtn) {
+      modeBlurBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'blur' });
+      });
+      modeRedactedBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'redacted' });
+      });
+    }
 
     // ---- Reset Button ---------------------------------------------------------
     const resetBtn = shadow.getElementById('fab-reset-btn');
@@ -483,10 +517,9 @@
 
 
     // Re-inject when WhatsApp SPA rebuilds the chatlist header
-    const clbObserver = new MutationObserver(() => {
+    setInterval(() => {
       if (!document.getElementById(CLB_ID)) injectChatlistBtn();
-    });
-    clbObserver.observe(document.documentElement, { childList: true, subtree: true });
+    }, 1500);
     injectChatlistBtn();
   }
 

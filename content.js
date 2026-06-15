@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
   inputOpacity: 30,
   unblurLastN: false,
   unblurLastNCount: 3,
+  privacyMode: 'blur',
 };
 
 /* --------------------------------------------------------------------------
@@ -70,6 +71,7 @@ function buildCSS(settings) {
     }
 
     // --- Filter/blur mode (everything else) ---
+    const isRedacted = settings.privacyMode === 'redacted';
     const multiplier = rule.blurMultiplier || 1;
     const blurValue = multiplier === 1
       ? 'var(--wa-blur-amount)'
@@ -77,19 +79,32 @@ function buildCSS(settings) {
 
     const filterTransition = settings.noTransition
       ? 'transition: none !important;'
-      : 'transition-property: filter !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+      : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
 
     const hoverFilterTransition = settings.noTransition
-      ? 'transition-property: filter !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
-      : 'transition-property: filter !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
+      ? 'transition-property: filter, color, background-color !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
+      : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
+
+    const redactedCSS = `
+      filter: brightness(0) !important;
+      color: #000 !important;
+      background-color: #000 !important;
+    `;
+    const redactedHoverCSS = `
+      filter: none !important;
+      color: unset !important;
+      background-color: unset !important;
+    `;
+    const blurCSS = `filter: blur(${blurValue}) !important;`;
+    const blurHoverCSS = `filter: none !important;`;
 
     css += `
     ${blurSelectors} {
-      filter: blur(${blurValue}) !important;
+      ${isRedacted ? redactedCSS : blurCSS}
       ${filterTransition}
     }
     ${hoverSelectors} {
-      filter: none !important;
+      ${isRedacted ? redactedHoverCSS : blurHoverCSS}
       ${hoverFilterTransition}
     }`;
 
@@ -100,11 +115,11 @@ function buildCSS(settings) {
         const childHover = `${scope} ${hoverParent}:hover:not(.wa-unblur-override):not(.wa-unblur-override *) ${child}`;
         css += `
         ${childBlur} {
-          filter: blur(${blurValue}) !important;
+          ${isRedacted ? redactedCSS : blurCSS}
           ${filterTransition}
         }
         ${childHover} {
-          filter: none !important;
+          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
           ${hoverFilterTransition}
         }`;
       }
@@ -118,11 +133,11 @@ function buildCSS(settings) {
         const baseSelector = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
         css += `
         ${baseSelector}:not(.wa-js-hover-unblur) {
-          filter: blur(${blurValue}) !important;
+          ${isRedacted ? redactedCSS : blurCSS}
           ${filterTransition}
         }
         ${baseSelector}.wa-js-hover-unblur {
-          filter: none !important;
+          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
           ${hoverFilterTransition}
         }`;
       }
@@ -237,7 +252,8 @@ let currentJsUnblurTargets = new Set();
 function updateHoverHasRules(settings) {
   activeHoverHasRules = [];
   const isEnabled = settings.enabled !== undefined ? settings.enabled : DEFAULT_SETTINGS.enabled;
-  if (!isEnabled) {
+  const privacyMode = settings.privacyMode || 'blur';
+  if (!isEnabled || privacyMode === 'redacted') {
     for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
     currentJsUnblurTargets.clear();
     return;

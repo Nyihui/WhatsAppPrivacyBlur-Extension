@@ -73,12 +73,26 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
     </div>
   </div>
 
+  <div class="info-text" style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 15px;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+    <span>If scrolling feels laggy, switch to Redacted mode.</span>
+  </div>
+
   <div class="card slider-card">
-    <div class="slider-header">
-      <span class="slider-title">Blur Intensity</span>
-      <span class="slider-val" id="fab-blur-val">3px</span>
+    <div class="mode-toggle-group" style="display: flex; margin-bottom: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color);">
+      <button type="button" class="mode-btn active" id="fab-mode-blur" style="flex:1; padding: 6px; background: var(--bg-hover); color: var(--text-color); border: none; cursor: pointer; font-size: 0.75rem; font-weight: 500;">Blur</button>
+      <button type="button" class="mode-btn" id="fab-mode-redacted" style="flex:1; padding: 6px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-size: 0.75rem; font-weight: 500; border-left: 1px solid var(--border-color);">Redacted</button>
     </div>
-    <input type="range" id="fab-blur-intensity" min="2" max="20" value="3" class="range-slider">
+
+    <div id="fab-blur-intensity-wrapper">
+      <div class="slider-header">
+        <span class="slider-title">Blur Intensity</span>
+        <span class="slider-val" id="fab-blur-val">3px</span>
+      </div>
+      <input type="range" id="fab-blur-intensity" min="2" max="20" value="3" class="range-slider">
+    </div>
   </div>
 
   <div class="card section-card">
