@@ -10,16 +10,15 @@ window.WA_BLUR_RULES.push({
   property: 'filter',
   blurMultiplier: 5,
   targets: [
-    // //  Conversation Media
-    // '[data-testid="media-viewer-modal"] [data-testid="media-video"]',
-    // '[data-testid="media-viewer-modal"] [data-testid="media-zoomable"]',
-    // '[data-testid="media-viewer-modal"] [data-testid="media-gif"]',
-    // '[data-testid="drawer-middle"] [data-animate-attach-media="true"] > div > div > div',
+    //  Conversation Media
+    '[data-testid="media-video"]',
+    '[data-testid="media-zoomable"]',
+    '[data-testid="media-gif"]',
+    '[data-testid="drawer-middle"] [data-animate-attach-media="true"] > div > div > div',
   ],
   hoverHasTargets: [
     // {
-    //   // Drawer Media: Blur the wrapper div (to prevent edge clipping), but only unblur when the inner image is hovered
-    //   ancestor: '[data-testid="drawer-middle"] div:has(button[data-testid="webtp-powered-by"]) div:has(> img)',
+    //   ancestor: 'div:has(button[data-testid="webtp-powered-by"]) div:has(> img)',
     //   hoverTrigger: '> img',
     //   child: ''
     // },

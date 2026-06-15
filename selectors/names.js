@@ -14,7 +14,6 @@ window.WA_BLUR_RULES.push({
     // EXPERIMENTAL
     '[role="gridcell"] [data-testid="cell-frame-title"]',
 
-
     //  Main Chat List Sidebar
     // -- '[data-testid="message-yourself-row"] [data-testid="cell-frame-title"]',
     // -- '[data-testid*="list-item-"] [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
@@ -36,19 +35,19 @@ window.WA_BLUR_RULES.push({
     '[data-testid="vcard-msg"] > div:nth-child(2)',
     'div[role="button"]:has( > [data-testid="chat-msg-symbol"] [data-testid="person-refreshed-outline-thin"])',
     //  Right Sidebar - Chat Info Drawer
-    '[data-testid*="contact-info-subtitle"]',
+    'div:has( > div > span > div > div > span[data-testid*="contact-info-subtitle"])',
     'div:has( > span[data-testid="group-info-drawer-subject-input-read-only selectable-text"])',
     //  Right Sidebar - Group Participants Info
     // -- '[data-testid="group-info-participants-section"] [id="pane-side"] [role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-title"]',
-    '[role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-secondary"] > div:nth-child(2)',
+    '[data-testid="group-info-participants-section"] [role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-secondary"] > div:nth-child(2)',
     //  Right Sidebar - Common Group
     // -- 'div:has([data-testid="section-common-groups"]) [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
     'div:has( > [data-testid="section-common-groups"]) [data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"]',
     //  Right Sidebar - Links Gallery Messages
     '[data-testid="link-gallery-msg"] > div:first-child > div:first-child > span[dir="auto"]',
-    //  Popup Members
+    // //  Popup Members
     // -- '[data-testid="popup-contents"] [data-testid="contacts-modal"] [role="listitem"] [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
-    // '[data-testid="popup-contents"] [data-testid="contacts-modal"] [role="listitem"] [data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"] > div:nth-child(2)',
+    '[data-testid="contacts-modal"] [role="listitem"] [data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"] > div:nth-child(2)',
     //  Profile Picture Overlay
     // -- '[class*="overlay"] [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
   ],

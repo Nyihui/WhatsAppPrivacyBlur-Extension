@@ -11,8 +11,8 @@ window.WA_BLUR_RULES.push(
     property: 'filter',
     blurMultiplier: 2,
     targets: [
-      // //  Conversation Panel
-      // '[data-testid="conversation-panel-messages"] [data-testid="msg-container"] div:has( > span[data-testid="sticker-container"])',
+      //  Conversation Panel
+      'div:has( > span[data-testid="sticker-container"])',
       // '[data-testid="conversation-panel-messages"] [data-id*="grouped-sticker"] div:has( > span[data-testid="sticker-container"])',
       // //  Expression Panel
       // '[data-testid="expressions-panel"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] img)',
