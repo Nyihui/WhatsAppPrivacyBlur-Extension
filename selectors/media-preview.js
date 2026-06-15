@@ -26,22 +26,22 @@ window.WA_BLUR_RULES.push({
     '[data-testid="media-hub-modal"] [data-focusid="media-hub-row-item"]',
   ],
   // Blur a child element but reveal it when hovering the PARENT.
-  // hoverParentTargets: [
-  //   {
-  //     hoverParent: '[data-testid="image-thumb-gif"]',
-  //     child: '> div:has(video)',
-  //   },
-  //   {
-  //     hoverParent: '[data-testid="video-content"]',
-  //     child: '> div[style*="background-image: url"]',
-  //   },
-  //   {
-  //     hoverParent: '[data-testid="image-thumb"]',
-  //     child: '> img',
-  //   },
-  //   {
-  //     hoverParent: '[data-testid="media-canvas"] > div',
-  //     child: '> button > div[style*="background-image: url"]',
-  //   },
-  // ],
+  hoverParentTargets: [
+    {
+      hoverParent: '[data-testid="image-thumb-gif"]',
+      child: '> div:has(video)',
+    },
+    {
+      hoverParent: '[data-testid="video-content"]',
+      child: '> div[style*="background-image: url"]',
+    },
+    {
+      hoverParent: '[data-testid="image-thumb"]',
+      child: '> img',
+    },
+    {
+      hoverParent: '[data-testid="media-canvas"] > div',
+      child: '> button > div[style*="background-image: url"]',
+    },
+  ],
 });

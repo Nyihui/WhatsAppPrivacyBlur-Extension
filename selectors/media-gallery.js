@@ -17,21 +17,21 @@ window.WA_BLUR_RULES.push({
     '[data-testid="drawer-middle"] [data-animate-attach-media="true"] > div > div > div',
   ],
   hoverHasTargets: [
-    // {
-    //   ancestor: 'div:has(button[data-testid="webtp-powered-by"]) div:has(> img)',
-    //   hoverTrigger: '> img',
-    //   child: ''
-    // },
-    // //  Story Media + Submit Media — unblur only when a specific trigger is hovered (not the blurred element itself)
-    // {
-    //   ancestor: '[data-testid="status-player-uie"]',
-    //   hoverTrigger: '[style*="position: absolute"]',
-    //   child: '> div > button > div[data-testid="status-video"]',
-    // },
-    // {
-    //   ancestor: '[data-testid="drawer-middle"]',
-    //   hoverTrigger: '[data-testid="media-editor-canvas"]',
-    //   child: 'div:has( > [data-testid="media-editor-canvas"])',
-    // }
+    {
+      ancestor: 'div:has(button[data-testid="webtp-powered-by"]) div:has(> img)',
+      hoverTrigger: '> img',
+      child: ''
+    },
+    //  Story Media + Submit Media — unblur only when a specific trigger is hovered (not the blurred element itself)
+    {
+      ancestor: '[data-testid="status-player-uie"]',
+      hoverTrigger: '[style*="position: absolute"]',
+      child: '> div > button > div[data-testid="status-video"]',
+    },
+    {
+      ancestor: '[data-testid="drawer-middle"]',
+      hoverTrigger: '[data-testid="media-editor-canvas"]',
+      child: 'div:has( > [data-testid="media-editor-canvas"])',
+    }
   ],
 });

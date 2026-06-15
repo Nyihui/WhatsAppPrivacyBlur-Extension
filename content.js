@@ -110,19 +110,18 @@ function buildCSS(settings) {
       }
     }
 
-    // --- hoverHasTargets: blur a child, unblur only when a SPECIFIC sibling/overlay/child is hovered ---
-    // Uses :has() on a common ancestor. If child is empty, the ancestor itself is blurred.
+    // --- hoverHasTargets: JS-Based hover unblur logic ---
+    // Generates CSS targeting the .wa-js-hover-unblur class applied by our global event listener
     if (rule.hoverHasTargets && rule.hoverHasTargets.length > 0) {
       for (const { ancestor, hoverTrigger, child } of rule.hoverHasTargets) {
         const childPart = child ? ` ${child}` : '';
-        const childBlur = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
-        const childHover = `${scope} ${ancestor}:has(${hoverTrigger}:hover):not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
+        const baseSelector = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
         css += `
-        ${childBlur} {
+        ${baseSelector}:not(.wa-js-hover-unblur) {
           filter: blur(${blurValue}) !important;
           ${filterTransition}
         }
-        ${childHover} {
+        ${baseSelector}.wa-js-hover-unblur {
           filter: none !important;
           ${hoverFilterTransition}
         }`;
@@ -170,6 +169,9 @@ function applySettings(settings) {
 
   // 4. Manage DOM Observer for "Unblur Last N Messages"
   manageUnblurObserver(settings);
+
+  // 5. Update JS hover delegation rules
+  updateHoverHasRules(settings);
 
   // console.log('[Privacy Blur] Applied settings:', settings);
 }
@@ -224,6 +226,77 @@ function manageUnblurObserver(settings) {
     document.querySelectorAll('.wa-unblur-override').forEach(el => el.classList.remove('wa-unblur-override'));
   }
 }
+
+// ---------------------------------------------------------------------------
+// JS-Based Hover Delegation for Complex Targets
+// Replaces slow CSS :has(:hover) selectors
+// ---------------------------------------------------------------------------
+let activeHoverHasRules = [];
+let currentJsUnblurTargets = new Set();
+
+function updateHoverHasRules(settings) {
+  activeHoverHasRules = [];
+  const isEnabled = settings.enabled !== undefined ? settings.enabled : DEFAULT_SETTINGS.enabled;
+  if (!isEnabled) {
+    for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
+    currentJsUnblurTargets.clear();
+    return;
+  }
+
+  for (const rule of window.WA_BLUR_RULES) {
+    const isActive = settings[rule.key] !== undefined ? settings[rule.key] : DEFAULT_SETTINGS[rule.key];
+    if (isActive && rule.hoverHasTargets) {
+      activeHoverHasRules.push(...rule.hoverHasTargets);
+    }
+  }
+}
+
+document.addEventListener('mouseover', (e) => {
+  if (activeHoverHasRules.length === 0) return;
+
+  const newTargets = new Set();
+
+  for (const { ancestor, hoverTrigger, child } of activeHoverHasRules) {
+    const triggers = hoverTrigger.split(',').map(t => {
+      const trimmed = t.trim();
+      return `${ancestor}${trimmed.startsWith('>') ? '' : ' '}${trimmed}`;
+    }).join(', ');
+
+    try {
+      const triggerEl = e.target.closest(triggers);
+      if (triggerEl) {
+        const ancestorEl = triggerEl.closest(ancestor);
+        if (ancestorEl) {
+          if (child) {
+            const childSelector = `:scope${child.trim().startsWith('>') ? '' : ' '}${child}`;
+            const childEls = ancestorEl.querySelectorAll(childSelector);
+            childEls.forEach(el => newTargets.add(el));
+          } else {
+            newTargets.add(ancestorEl);
+          }
+        }
+      }
+    } catch (err) {
+      // Ignore dynamically invalid selectors
+    }
+  }
+
+  for (const el of currentJsUnblurTargets) {
+    if (!newTargets.has(el)) el.classList.remove('wa-js-hover-unblur');
+  }
+  for (const el of newTargets) {
+    el.classList.add('wa-js-hover-unblur');
+  }
+
+  currentJsUnblurTargets = newTargets;
+});
+
+document.addEventListener('mouseout', (e) => {
+  if (!e.relatedTarget) {
+    for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
+    currentJsUnblurTargets.clear();
+  }
+});
 
 // ---------------------------------------------------------------------------
 // Bootstrap
