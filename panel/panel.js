@@ -26,7 +26,7 @@
     privacyMode: 'blur',
   };
 
-  const PANEL_W = 320;  // px — matches #wa-panel width in css.js
+  const PANEL_W = 580;
   const PANEL_GAP = 8;    // px — gap between anchor and panel
   const EDGE_MARGIN = 12;   // px — minimum distance from viewport edges
 
@@ -470,7 +470,7 @@
           'opacity:0',
           'display:flex',
           'align-items:center',
-          'transform:translateY(-50%) scale(0.95)',
+          'transform:translateY(-50%) scale(1)',
           'transform-origin:left center',
           'transition:transform 0 cubic-bezier(0, 0, 0.2, 1), opacity 0 cubic-bezier(0, 0, 0.2, 1)',
           'font-family:inherit'
