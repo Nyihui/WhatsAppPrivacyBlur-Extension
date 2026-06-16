@@ -12,35 +12,35 @@ window.WA_BLUR_RULES.push(
     blurMultiplier: 1,
     targets: [
       // //  Main Chat List Sidebar
-      '[data-testid="navbar-item-me-tab-photo"] | closest:button',
+      'button:has([data-testid="navbar-item-me-tab-photo"])',
       '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child img',
       '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child img',
-      '[data-testid="default-contact-refreshed"] | closest:div',
-      '[data-testid="default-group-refreshed"] | closest:div',
+      'div:has( > [data-testid="default-contact-refreshed"])',
+      'div:has( > [data-testid="default-group-refreshed"])',
       // //  Recent Search
-      '[data-testid="recent-search-item"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      '[data-testid="recent-search-item"] > div:first-child:not(:has([data-testid="default-contact-refreshed"], [data-testid="default-group-refreshed"]))',
       //  Me Tab Drawer Sidebar
       '[data-testid="me-tab-drawer"] [data-testid="menu-controller-focus-receiver"] img[src*="https://media"]',
       '[data-testid="profile-drawer"] img[src*="https://media"]',
       //  Status Sidebar
       '[data-testid="status-tab-drawer"] [data-testid="status-header-add-status"] img[src*="https://media"]',
       //  Status Player
-      '[data-testid="status-player-uie"] img[src*="https"]:not([data-testid="sticker-item"] *, [data-testid="status-emoji-bar"] *, [style*="position: absolute"] *)',
+      '[data-testid="status-player-uie"] img[src*="https"]:not([data-testid="sticker-item"] *, [data-testid="status-emoji-bar"] *)',
       // //  Channel Sidebar
       // '[data-testid="newsletter-drawer"] [data-testid="newsletter-tab-newsletter-cell"] [data-testid="cell-frame-container"] > div:first-child img',
       // '[data-testid="newsletter-drawer"] [data-testid="newsletter-recommended-item"] [data-testid="cell-frame-container"] > div > div:first-child img',
       //  Conversation Panel - Header
-      '[data-testid="conversation-header"] > div:first-child > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      '[data-testid="conversation-header"] > div:first-child > div:first-child:not(:has([data-testid="default-contact-refreshed"], [data-testid="default-group-refreshed"]))',
       // '[data-testid="conversation-header"] [data-testid="default-contact-refreshed"]',
       // '[data-testid="conversation-header"] [data-testid="default-group-refreshed"]',
       //  Conversation Panel - Messages
       '[data-testid="group-chat-profile-picture"]',
       // '[data-testid="conversation-panel-messages"] [data-testid="vcard-msg"] img',
-      // '[data-testid="chat-msg-symbol"] | closest:[data-testid="quoted-message"] | find:img',
-      // '[data-testid="ptt-status"] | closest:div | closest:div | closest:div | closest:div | closest:[data-testid="msg-container"] | find:> div:first-child',
+      // '[data-testid="conversation-panel-messages"] [data-testid="quoted-message"]:has([data-testid="chat-msg-symbol"]) img',
+      // '[data-testid="conversation-panel-messages"] [data-testid="msg-container"] div:has( > div > div > div > [data-testid="ptt-status"]) > div:first-child',
       //  Right Sidebar - Chat Info Drawer
-      '[data-testid="chat-info-drawer"] > :nth-child(2) [class*="html-span"] | has:img',
-      '[tabindex="-1"] > button[data-testid="group-pic-picker"] | up:2',
+      '[data-testid="chat-info-drawer"] > :nth-child(2) [class*="html-span"]:has(img)',
+      ':has( > [tabindex="-1"] > button[data-testid="group-pic-picker"])',
       // '[data-testid="chat-info-drawer"] span[class*="html-span"] [data-testid="default-contact-refreshed"]',
       // //  Right Sidebar - Group Participants Info
       // '[data-testid="group-info-participants-section"] [id="pane-side"] [role="listitem"] [data-testid="cell-frame-container"] > div:first-child img',
@@ -64,8 +64,8 @@ window.WA_BLUR_RULES.push(
     property: 'filter',
     blurMultiplier: 5,
     targets: [
-      '[class*="overlay"] [dir="ltr"] img | closest:div',
-      '[class*="overlay"] [dir="rtl"] img | closest:div',
+      '[class*="overlay"] [dir="ltr"] div:has( > img)',
+      '[class*="overlay"] [dir="rtl"] div:has( > img)',
     ],
   }
 );

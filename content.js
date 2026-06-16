@@ -33,7 +33,7 @@ function buildCSS(settings) {
     : 'filter 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
   let css = '';
 
-  for (const rule of window.WA_BLUR_RULES) {
+  window.WA_BLUR_RULES.forEach((rule, ruleIndex) => {
     const isActive = settings[rule.key] !== undefined
       ? settings[rule.key]
       : DEFAULT_SETTINGS[rule.key];
@@ -41,12 +41,35 @@ function buildCSS(settings) {
     // --- Special: Unblur Override (Injected once manually below loop) ---
 
 
-    if (!isActive || !rule.targets || rule.targets.length === 0) continue;
+    if (!isActive) return;
+    const hasTargets = rule.targets && rule.targets.length > 0;
+    const hasHoverTargets = rule.hoverHasTargets && rule.hoverHasTargets.length > 0;
+    if (!hasTargets && !hasHoverTargets) return;
 
     const scope = ROOT;
-    const scopedTargets = rule.targets.map(t => `${scope} ${t}:not(.wa-unblur-override):not(.wa-unblur-override *)`);
+    const pureTargets = [];
+    if (rule.targets) {
+      rule.targets.forEach((t, index) => {
+        if (typeof t === 'string' && t.includes('|')) {
+          pureTargets.push(`.wa-js-target-${rule.key}-${ruleIndex}-${index}`);
+        } else if (typeof t === 'string') {
+          pureTargets.push(t);
+        }
+      });
+    }
+
+    if (rule.hoverHasTargets) {
+      rule.hoverHasTargets.forEach((hht, index) => {
+        pureTargets.push(`.wa-js-target-${rule.key}-hht-${ruleIndex}-${index}`);
+      });
+    }
+
+    if (pureTargets.length === 0) return;
+
+    const scopedTargets = pureTargets.map(t => `${scope} ${t}:not(.wa-unblur-override):not(.wa-unblur-override *)`);
     const hoverSelectors = scopedTargets.map(t => `${t}:hover`).join(',\n');
     const blurSelectors = scopedTargets.join(',\n');
+    const overrideSelectors = pureTargets.map(t => `${scope} ${t}.wa-unblur-override, ${scope} .wa-unblur-override ${t}`).join(',\n');
 
     // --- Opacity mode (Text Input) ---
     if (rule.property === 'opacity') {
@@ -57,34 +80,33 @@ function buildCSS(settings) {
       const hoverOpacityTransition = settings.noTransition
         ? 'transition-property: opacity !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
         : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
-        
+
       css += `
       ${blurSelectors} {
         opacity: var(--wa-input-opacity) !important;
         ${opacityTransition}
       }
-      ${hoverSelectors} {
+      ${hoverSelectors},
+      ${overrideSelectors} {
         opacity: 1 !important;
         ${hoverOpacityTransition}
       }`;
-      continue;
+      return;
     }
 
     // --- Filter/blur mode (everything else) ---
     const isRedacted = settings.privacyMode === 'redacted';
-    const isLite = settings.privacyMode === 'lite';
-    const isStatic = isRedacted || isLite; // Lite and Redacted both kill JS & transitions
 
     const multiplier = rule.blurMultiplier || 1;
     const blurValue = multiplier === 1
       ? 'var(--wa-blur-amount)'
       : `calc(var(--wa-blur-amount) * ${multiplier})`;
 
-    const filterTransition = (settings.noTransition || isStatic)
+    const filterTransition = settings.noTransition
       ? 'transition: none !important;'
       : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
 
-    const hoverFilterTransition = (settings.noTransition || isStatic)
+    const hoverFilterTransition = settings.noTransition
       ? 'transition: none !important;'
       : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
 
@@ -106,7 +128,8 @@ function buildCSS(settings) {
       ${isRedacted ? redactedCSS : blurCSS}
       ${filterTransition}
     }
-    ${hoverSelectors} {
+    ${hoverSelectors},
+    ${overrideSelectors} {
       ${isRedacted ? redactedHoverCSS : blurHoverCSS}
       ${hoverFilterTransition}
     }`;
@@ -128,27 +151,8 @@ function buildCSS(settings) {
       }
     }
 
-    // --- hoverHasTargets: JS-Based hover unblur logic ---
-    if (rule.hoverHasTargets && rule.hoverHasTargets.length > 0) {
-      for (const { ancestor, hoverTrigger, child } of rule.hoverHasTargets) {
-        const childPart = child ? ` ${child}` : '';
-        const baseSelector = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
-        const hoverSelector = isStatic 
-            ? `${scope} ${ancestor}:hover:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`
-            : `${baseSelector}.wa-js-hover-unblur`;
-
-        css += `
-        ${baseSelector}:not(.wa-js-hover-unblur) {
-          ${isRedacted ? redactedCSS : blurCSS}
-          ${filterTransition}
-        }
-        ${hoverSelector} {
-          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
-          ${hoverFilterTransition}
-        }`;
-      }
-    }
-  }
+    // Removed JS hover unblur logic from here. It was deleted earlier.
+  });
   return css;
 }
 
@@ -172,6 +176,7 @@ function injectCSS(css) {
    Applies CSS variables, toggles the master class, and rebuilds the stylesheet.
 -------------------------------------------------------------------------- */
 function applySettings(settings) {
+  currentSettings = settings;
   const root = document.documentElement;
 
   // 1. CSS custom properties
@@ -190,17 +195,16 @@ function applySettings(settings) {
   // 4. Manage DOM Observer for "Unblur Last N Messages"
   manageUnblurObserver(settings);
 
-  // 5. Update JS hover delegation rules
-  updateHoverHasRules(settings);
-
   // console.log('[Privacy Blur] Applied settings:', settings);
 }
 
 // ---------------------------------------------------------------------------
-// DOM Polling: Unblur Last N Messages
+// DOM Polling: Unblur Last N Messages & JS Pipeline Targets
 // ---------------------------------------------------------------------------
 let currentUnblurN = 0;
-let unblurInterval = null;
+let domObserver = null;
+let domRAF = null;
+let currentSettings = DEFAULT_SETTINGS;
 
 function applyUnblurLastN() {
   if (currentUnblurN <= 0) return;
@@ -224,102 +228,182 @@ function applyUnblurLastN() {
   }
 }
 
+function evaluatePipeline(targetStr) {
+  if (typeof targetStr !== 'string' || !targetStr.includes('|')) return [];
+  const parts = targetStr.split('|').map(s => s.trim());
+  const triggerSelector = parts[0];
+  const commands = parts.slice(1);
+  let results = [];
+
+  try {
+    const elements = document.querySelectorAll(triggerSelector);
+    elements.forEach(el => {
+      let current = el;
+      let isValid = true;
+      let finalTargets = [current];
+
+      for (const cmd of commands) {
+        if (!current || !isValid) break;
+
+        const colonIdx = cmd.indexOf(':');
+        const action = colonIdx > -1 ? cmd.substring(0, colonIdx).trim() : cmd.trim();
+        const value = colonIdx > -1 ? cmd.substring(colonIdx + 1).trim() : '';
+
+        if (action === 'closest') {
+          current = current.closest(value);
+          finalTargets = [current];
+        } else if (action === 'up') {
+          const steps = parseInt(value) || 1;
+          for (let i = 0; i < steps; i++) {
+            if (current) current = current.parentElement;
+          }
+          finalTargets = [current];
+        } else if (action === 'find') {
+          let queryValue = value;
+          if (queryValue.startsWith('>')) queryValue = `:scope ${queryValue}`;
+          finalTargets = Array.from(current.querySelectorAll(queryValue));
+        } else if (action === 'has') {
+          let queryValue = value;
+          if (queryValue.startsWith('>')) queryValue = `:scope ${queryValue}`;
+          if (!current.querySelector(queryValue)) isValid = false;
+        } else if (action === 'not-has') {
+          let queryValue = value;
+          if (queryValue.startsWith('>')) queryValue = `:scope ${queryValue}`;
+          if (current.querySelector(queryValue)) isValid = false;
+        }
+      }
+
+      if (isValid && current && finalTargets.length > 0) {
+        results.push(...finalTargets.filter(t => t != null));
+      }
+    });
+  } catch (e) {
+    // console.error('Invalid selector pipeline', e);
+  }
+  return results;
+}
+
+function applyJsTargets() {
+  const settings = currentSettings;
+  const isEnabled = settings.enabled ?? DEFAULT_SETTINGS.enabled;
+  if (!isEnabled) return;
+
+  window.WA_BLUR_RULES.forEach((rule, ruleIndex) => {
+    const isActive = settings[rule.key] !== undefined ? settings[rule.key] : DEFAULT_SETTINGS[rule.key];
+    if (!isActive) return;
+
+    if (rule.targets) {
+      rule.targets.forEach((targetStr, index) => {
+        if (typeof targetStr !== 'string' || !targetStr.includes('|')) return;
+
+        const className = `wa-js-target-${rule.key}-${ruleIndex}-${index}`;
+        const targets = evaluatePipeline(targetStr);
+        targets.forEach(t => {
+          if (!t.classList.contains(className)) {
+            t.classList.add(className);
+          }
+        });
+      });
+    }
+
+    if (rule.hoverHasTargets) {
+      rule.hoverHasTargets.forEach((hht, index) => {
+        const blurTargets = evaluatePipeline(hht.blurTarget);
+        const triggerTargets = evaluatePipeline(hht.hoverTrigger);
+
+        const className = `wa-js-target-${rule.key}-hht-${ruleIndex}-${index}`;
+
+        blurTargets.forEach(t => {
+          if (!t.classList.contains(className)) {
+            t.classList.add(className);
+          }
+        });
+
+        triggerTargets.forEach(trigger => {
+          if (trigger.dataset.hhtProcessed) return;
+          trigger.dataset.hhtProcessed = "true";
+
+          trigger.addEventListener('mouseenter', () => {
+            const currentBlurTargets = evaluatePipeline(hht.blurTarget);
+            currentBlurTargets.forEach(t => t.classList.add('wa-unblur-override'));
+          });
+
+          trigger.addEventListener('mouseleave', () => {
+            const currentBlurTargets = evaluatePipeline(hht.blurTarget);
+            currentBlurTargets.forEach(t => t.classList.remove('wa-unblur-override'));
+          });
+        });
+      });
+    }
+  });
+}
+
+function applyDomUpdates() {
+  applyUnblurLastN();
+  applyJsTargets();
+}
+
+function scheduleDomUpdates() {
+  if (domRAF) return; // Already scheduled
+  domRAF = requestAnimationFrame(() => {
+    applyDomUpdates();
+    domRAF = null;
+  });
+}
+
+let observer = null;
+let updateTimeout = null;
+
+function startObserver() {
+  if (observer) observer.disconnect();
+  observer = new MutationObserver((mutations) => {
+    let shouldUpdate = false;
+    for (let m of mutations) {
+      if (m.type === 'childList' && m.addedNodes.length > 0) {
+        shouldUpdate = true;
+        break;
+      }
+      if (m.type === 'attributes' && m.attributeName === 'class') {
+        shouldUpdate = true;
+        break;
+      }
+    }
+    if (shouldUpdate) {
+      scheduleDomUpdates();
+    }
+  });
+
+  observer.observe(document.body || document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class']
+  });
+}
+
 function manageUnblurObserver(settings) {
   const isEnabled = settings.enabled ?? DEFAULT_SETTINGS.enabled;
   const unblurLastN = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
   const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
-  const privacyMode = settings.privacyMode || 'blur';
 
-  // We re-enable the ultra-lightweight JS poller for all modes.
   currentUnblurN = (isEnabled && unblurLastN) ? unblurLastNCount : 0;
 
-  if (currentUnblurN > 0) {
-    applyUnblurLastN(); // Apply immediately
-    if (!unblurInterval) {
-      // Refresh every 500ms: lightweight targeted polling instead of a heavy MutationObserver
-      unblurInterval = setInterval(applyUnblurLastN, 500);
-    }
+  if (isEnabled) {
+    applyDomUpdates();
+    startObserver();
   } else {
-    if (unblurInterval) {
-      clearInterval(unblurInterval);
-      unblurInterval = null;
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+    if (domRAF) {
+      cancelAnimationFrame(domRAF);
+      domRAF = null;
     }
     // Cleanup overrides if toggled off
     document.querySelectorAll('.wa-unblur-override').forEach(el => el.classList.remove('wa-unblur-override'));
   }
 }
-
-// ---------------------------------------------------------------------------
-// JS-Based Hover Delegation for Complex Targets
-// Replaces slow CSS :has(:hover) selectors
-// ---------------------------------------------------------------------------
-let activeHoverHasRules = [];
-let currentJsUnblurTargets = new Set();
-
-function updateHoverHasRules(settings) {
-  activeHoverHasRules = [];
-  const isEnabled = settings.enabled !== undefined ? settings.enabled : DEFAULT_SETTINGS.enabled;
-  const privacyMode = settings.privacyMode || 'blur';
-  if (!isEnabled || privacyMode !== 'blur') {
-    for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
-    currentJsUnblurTargets.clear();
-    return;
-  }
-
-  for (const rule of window.WA_BLUR_RULES) {
-    const isActive = settings[rule.key] !== undefined ? settings[rule.key] : DEFAULT_SETTINGS[rule.key];
-    if (isActive && rule.hoverHasTargets) {
-      activeHoverHasRules.push(...rule.hoverHasTargets);
-    }
-  }
-}
-
-document.addEventListener('mouseover', (e) => {
-  if (activeHoverHasRules.length === 0) return;
-
-  const newTargets = new Set();
-
-  for (const { ancestor, hoverTrigger, child } of activeHoverHasRules) {
-    const triggers = hoverTrigger.split(',').map(t => {
-      const trimmed = t.trim();
-      return `${ancestor}${trimmed.startsWith('>') ? '' : ' '}${trimmed}`;
-    }).join(', ');
-
-    try {
-      const triggerEl = e.target.closest(triggers);
-      if (triggerEl) {
-        const ancestorEl = triggerEl.closest(ancestor);
-        if (ancestorEl) {
-          if (child) {
-            const childSelector = `:scope${child.trim().startsWith('>') ? '' : ' '}${child}`;
-            const childEls = ancestorEl.querySelectorAll(childSelector);
-            childEls.forEach(el => newTargets.add(el));
-          } else {
-            newTargets.add(ancestorEl);
-          }
-        }
-      }
-    } catch (err) {
-      // Ignore dynamically invalid selectors
-    }
-  }
-
-  for (const el of currentJsUnblurTargets) {
-    if (!newTargets.has(el)) el.classList.remove('wa-js-hover-unblur');
-  }
-  for (const el of newTargets) {
-    el.classList.add('wa-js-hover-unblur');
-  }
-
-  currentJsUnblurTargets = newTargets;
-});
-
-document.addEventListener('mouseout', (e) => {
-  if (!e.relatedTarget) {
-    for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
-    currentJsUnblurTargets.clear();
-  }
-});
 
 // ---------------------------------------------------------------------------
 // Bootstrap

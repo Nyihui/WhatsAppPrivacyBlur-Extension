@@ -14,12 +14,12 @@ window.WA_BLUR_RULES.push({
     '[data-testid="media-url-provider"]:not([data-testid="media-hub-thumb"] * )',
     '[data-testid="link-preview-container"]',
     '[data-testid="document-thumb"]',
-    '[data-testid="quoted-message"] > div > div:last-child [style*="background-image: url"] | up:1',
+    '[data-testid="quoted-message"] > div > div:last-child div:has( > [style*="background-image: url"])',
     //  Right Sidebar
     // '[data-testid="media-canvas"]',
     // //  Media List on Fullscreen View
     // '[role="list"] [data-testid="media-canvas"] [data-testid="media-url-provider"] [data-testid="media-canvas-img"]',
-    '[role="list"] [role="listitem"] [role="tab"] img | closest:div',
+    '[role="list"] [role="listitem"] [role="tab"] div:has( > img)',
     // //  Media Hub Dialog
     '[data-testid="media-hub-modal"] [data-testid="media-hub-thumb"]',
     // '[data-testid="media-hub-modal"] [data-testid="popup-contents"] [data-testid="media-hub-thumb"]',
@@ -30,7 +30,7 @@ window.WA_BLUR_RULES.push({
   hoverParentTargets: [
     {
       hoverParent: '[data-testid="image-thumb-gif"]',
-      child: 'video',
+      child: '> div:has(video)',
     },
     {
       hoverParent: '[data-testid="video-content"]',

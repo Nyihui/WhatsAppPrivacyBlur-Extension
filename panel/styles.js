@@ -58,7 +58,7 @@ window.WA_PANEL_STYLES = `
     pointer-events: none;
     visibility: hidden;
     position: fixed;
-    width: 580px;
+    width: 540px;
     max-height: 80vh;
     background: var(--md-bg);
     border: 1px solid var(--md-outline);
@@ -242,7 +242,7 @@ window.WA_PANEL_STYLES = `
     color: var(--icon-active); 
   }
 
-  .row-text { display: flex; flex-direction: column; gap: 1px; }
+  .row-text { display: flex; flex-direction: column; gap: 1px; min-height: 28px; justify-content: center; }
   .row-title { font-size: 12px; font-weight: 400; color: var(--md-on-surface); line-height: 1.2; }
   .row-desc  { font-size: 10px; color: var(--md-on-s-var); line-height: 1.2; }
 
@@ -285,13 +285,11 @@ window.WA_PANEL_STYLES = `
   .range-slider::-webkit-slider-thumb {
     -webkit-appearance: none; width: 12px; height: 12px;
     border-radius: 50%; background: var(--md-primary); border: none; cursor: pointer;
-    box-shadow: 0 0 0 6px var(--md-primary-dim);
     transition: transform .1s;
   }
   .range-slider::-moz-range-thumb {
     width: 12px; height: 12px; border-radius: 50%; background: var(--md-primary);
     border: none; cursor: pointer;
-    box-shadow: 0 0 0 6px var(--md-primary-dim);
   }
   .range-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
   .range-slider::-moz-range-thumb:hover     { transform: scale(1.15); }
@@ -301,15 +299,15 @@ window.WA_PANEL_STYLES = `
   .control-row--expandable .row-main {
     display: flex; justify-content: space-between; align-items: center; width: 100%;
   }
-  .sub-slider { margin-top: 6px; padding: 6px 0 0; border-top: 1px solid var(--md-outline-var); }
-  .sub-slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+  .sub-slider { margin-top: 6px; border-top: 1px solid var(--md-outline-var); height: 34px; display: flex; flex-direction: column; justify-content: center; }
+  .sub-slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
   .sub-slider-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .8px; color: var(--md-on-s-var); }
   .sub-slider-val {
     font-size: 11px; font-weight: 500; color: var(--md-primary);
     background: var(--md-primary-dim);
     padding: 2px 8px; border-radius: 4px; min-width: 32px; text-align: center;
   }
-  .sub-range-slider { margin: 4px 0 2px; width: 100%; }
+  .sub-range-slider { margin: 0; width: 100%; }
 
   /* ---------------------------------------------------- SHIELD-OFF DIM STATE */
   .dashboard.shield-off .icon-box,

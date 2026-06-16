@@ -19,8 +19,8 @@ window.WA_BLUR_RULES.push({
     // -- '[data-testid*="list-item-"] [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
     //  Me Tab Drawer Sidebar
     '[data-testid="me-tab-drawer"] [data-testid="drawer-title-body"]',
-    '[data-testid="pushname-section"] | up:1 | find:> div:nth-child(2) > div > div:first-child',
-    '[data-testid="phone"] | up:1 | find:> div',
+    'div:has( > [data-testid="pushname-section"]) > div:nth-child(2) > div > div:first-child',
+    'div:has( > [data-testid="phone"]) > div',
     //  Status Sidebar
     // -- '[data-testid="status-row-cell"] [data-testid="cell-frame-title"]',
     //  Status Player
@@ -29,20 +29,20 @@ window.WA_BLUR_RULES.push({
     '[data-testid="newsletter-recommended-item"] > [data-testid="cell-frame-container"] > div > div:nth-child(2) > div:first-child',
     //  Conversation Panel - Header
     '[data-testid="conversation-info-header"] > div:first-child',
-    '[data-testid="conversation-info-header"] [data-testid="chat-subtitle"] | has:span',
+    '[data-testid="conversation-info-header"] [data-testid="chat-subtitle"]:has(span)',
     //  Conversation Panel - Messages
-    'span[data-testid="author"] | closest:div',
+    '[data-testid="msg-container"] div:has( > span[data-testid="author"])',
     '[data-testid="vcard-msg"] > div:nth-child(2)',
-    '[data-testid="chat-msg-symbol"] [data-testid="person-refreshed-outline-thin"] | closest:div[role="button"]',
+    'div[role="button"]:has( > [data-testid="chat-msg-symbol"] [data-testid="person-refreshed-outline-thin"])',
     //  Right Sidebar - Chat Info Drawer
-    'span[data-testid*="contact-info-subtitle"] | up:5',
-    'span[data-testid="group-info-drawer-subject-input-read-only selectable-text"] | closest:div',
+    'div:has( > div > span > div > div > span[data-testid*="contact-info-subtitle"])',
+    'div:has( > span[data-testid="group-info-drawer-subject-input-read-only selectable-text"])',
     //  Right Sidebar - Group Participants Info
     // -- '[data-testid="group-info-participants-section"] [id="pane-side"] [role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-title"]',
     '[data-testid="group-info-participants-section"] [role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-secondary"] > div:nth-child(2)',
     //  Right Sidebar - Common Group
     // -- 'div:has([data-testid="section-common-groups"]) [data-testid="cell-frame-container"] [data-testid="cell-frame-title"]',
-    '[data-testid="section-common-groups"] | up:1 | find:[data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"]',
+    'div:has( > [data-testid="section-common-groups"]) [data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"]',
     //  Right Sidebar - Links Gallery Messages
     '[data-testid="link-gallery-msg"] > div:first-child > div:first-child > span[dir="auto"]',
     // //  Popup Members

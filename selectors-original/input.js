@@ -9,6 +9,6 @@ window.WA_BLUR_RULES.push({
   label: 'Text Input',
   property: 'opacity',
   targets: [
-    'div[class*="lexical-rich-text-input"] | up:1',
+    'div:has( > div[class*="lexical-rich-text-input"])',
   ],
 });

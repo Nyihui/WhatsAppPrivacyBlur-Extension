@@ -26,7 +26,7 @@
     privacyMode: 'blur',
   };
 
-  const PANEL_W = 580;
+
   const PANEL_GAP = 8;    // px — gap between anchor and panel
   const EDGE_MARGIN = 12;   // px — minimum distance from viewport edges
 
@@ -80,15 +80,13 @@
     shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled) ? '' : 'none';
 
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
-    const modeLiteBtn = shadow.getElementById('fab-mode-lite');
     const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
     const blurIntensityWrapper = shadow.getElementById('fab-blur-intensity-wrapper');
     const rowUnblur = shadow.getElementById('row-fab-toggle-unblur-last-n');
     const rowNoTrans = shadow.getElementById('row-fab-toggle-no-transition');
 
-    if (modeBlurBtn && modeLiteBtn && modeRedactedBtn && blurIntensityWrapper) {
-      // Reset all buttons to inactive first
-      [modeBlurBtn, modeLiteBtn, modeRedactedBtn].forEach(btn => {
+    if (modeBlurBtn && modeRedactedBtn && blurIntensityWrapper) {
+      [modeBlurBtn, modeRedactedBtn].forEach(btn => {
         btn.style.background = 'transparent';
         btn.style.color = 'var(--md-on-s-var)';
         btn.style.borderColor = 'var(--md-outline)';
@@ -96,7 +94,7 @@
 
       // Highlight active button
       let activeBtn = modeBlurBtn;
-      if (privacyMode === 'lite') activeBtn = modeLiteBtn;
+      if (privacyMode === 'blur') activeBtn = modeBlurBtn;
       else if (privacyMode === 'redacted') activeBtn = modeRedactedBtn;
 
       activeBtn.style.background = 'var(--md-primary-dim)';
@@ -109,8 +107,8 @@
       // Unblur toggle is now powered by the ultra-lightweight JS poller for all modes
       if (rowUnblur) rowUnblur.style.display = 'flex';
 
-      // No-Trans toggle strictly requires JS/Animations, so hide if not in Standard Blur mode
-      if (rowNoTrans) rowNoTrans.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
+      // No-Trans toggle is supported in all active modes
+      if (rowNoTrans) rowNoTrans.style.display = 'flex';
     }
   }
 
@@ -137,9 +135,11 @@
 
     const isRTL = checkRTL();
 
+    const panelW = panel.offsetWidth || 580;
+
     // Horizontal positioning: align right edge in LTR, left edge in RTL, then clamp
-    let left = isRTL ? anchorLeft : anchorRight - PANEL_W;
-    left = Math.max(EDGE_MARGIN, Math.min(left, vw - PANEL_W - EDGE_MARGIN));
+    let left = isRTL ? anchorLeft : anchorRight - panelW;
+    left = Math.max(EDGE_MARGIN, Math.min(left, vw - panelW - EDGE_MARGIN));
     panel.style.left = `${left}px`;
     panel.style.right = '';
 
@@ -318,14 +318,10 @@
 
     // ---- Privacy Mode Toggle ------------------------------------------------
     const modeBlurBtn = shadow.getElementById('fab-mode-blur');
-    const modeLiteBtn = shadow.getElementById('fab-mode-lite');
     const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
-    if (modeBlurBtn && modeLiteBtn && modeRedactedBtn) {
+    if (modeBlurBtn && modeRedactedBtn) {
       modeBlurBtn.addEventListener('click', () => {
         chrome.storage.local.set({ privacyMode: 'blur' });
-      });
-      modeLiteBtn.addEventListener('click', () => {
-        chrome.storage.local.set({ privacyMode: 'lite' });
       });
       modeRedactedBtn.addEventListener('click', () => {
         chrome.storage.local.set({ privacyMode: 'redacted' });
