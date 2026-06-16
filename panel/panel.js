@@ -23,6 +23,7 @@
     inputOpacity: 30,
     unblurLastN: false,
     unblurLastNCount: 3,
+    privacyMode: 'blur',
   };
 
   const PANEL_W = 320;  // px — matches #wa-panel width in css.js
@@ -74,15 +75,50 @@
     const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
     shadow.getElementById('fab-unblur-last-n-slider').value = unblurLastNCount;
     shadow.getElementById('fab-unblur-last-n-val').textContent = unblurLastNCount;
+    const privacyMode = settings.privacyMode || 'blur';
     const unblurLastNEnabled = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
-    shadow.getElementById('fab-unblur-last-n-panel').style.display = unblurLastNEnabled ? '' : 'none';
+    shadow.getElementById('fab-unblur-last-n-panel').style.display = (unblurLastNEnabled) ? '' : 'none';
+
+    const modeBlurBtn = shadow.getElementById('fab-mode-blur');
+    const modeLiteBtn = shadow.getElementById('fab-mode-lite');
+    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
+    const blurIntensityWrapper = shadow.getElementById('fab-blur-intensity-wrapper');
+    const rowUnblur = shadow.getElementById('row-fab-toggle-unblur-last-n');
+    const rowNoTrans = shadow.getElementById('row-fab-toggle-no-transition');
+
+    if (modeBlurBtn && modeLiteBtn && modeRedactedBtn && blurIntensityWrapper) {
+      // Reset all buttons to inactive first
+      [modeBlurBtn, modeLiteBtn, modeRedactedBtn].forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--md-on-s-var)';
+        btn.style.borderColor = 'var(--md-outline)';
+      });
+
+      // Highlight active button
+      let activeBtn = modeBlurBtn;
+      if (privacyMode === 'lite') activeBtn = modeLiteBtn;
+      else if (privacyMode === 'redacted') activeBtn = modeRedactedBtn;
+
+      activeBtn.style.background = 'var(--md-primary-dim)';
+      activeBtn.style.color = 'var(--md-primary)';
+      activeBtn.style.borderColor = 'var(--md-primary)';
+
+      // Blur slider is only hidden in Redacted mode (Lite still uses blur value)
+      blurIntensityWrapper.style.display = (privacyMode === 'redacted') ? 'none' : 'block';
+
+      // Unblur toggle is now powered by the ultra-lightweight JS poller for all modes
+      if (rowUnblur) rowUnblur.style.display = 'flex';
+
+      // No-Trans toggle strictly requires JS/Animations, so hide if not in Standard Blur mode
+      if (rowNoTrans) rowNoTrans.style.display = (privacyMode === 'blur') ? 'flex' : 'none';
+    }
   }
 
   function checkRTL() {
     return document.documentElement.dir === 'rtl' ||
-           document.body?.dir === 'rtl' ||
-           (document.body && window.getComputedStyle(document.body).direction === 'rtl') ||
-           window.getComputedStyle(document.documentElement).direction === 'rtl';
+      document.body?.dir === 'rtl' ||
+      (document.body && window.getComputedStyle(document.body).direction === 'rtl') ||
+      window.getComputedStyle(document.documentElement).direction === 'rtl';
   }
 
   /**
@@ -137,6 +173,15 @@
     host.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483647;';
     document.body.appendChild(host);
 
+    function syncTheme() {
+      const isDark = document.body.classList.contains('dark') || document.documentElement.classList.contains('dark');
+      host.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+    syncTheme();
+    const themeObserver = new MutationObserver(syncTheme);
+    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
     const shadow = host.attachShadow({ mode: 'open' });
     const CLB_ID = 'wa-privacy-clb';
 
@@ -181,16 +226,16 @@
     function updateCLBGlow() {
       const clb = document.getElementById(CLB_ID);
       if (!clb) return;
+      const isDark = document.body.classList.contains('dark');
+      const fallbackActive = isDark ? '#FAFAFA' : '#0A0A0A';
+      const fallbackInactive = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)';
+
       if (isOpen) {
         setSafeSVG(clb, SVG_ACTIVE);
-        const isDark = document.body.classList.contains('dark');
-        const glowColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.6)';
-        clb.style.filter = `drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 0 4px ${glowColor})`;
-        clb.style.transform = 'scale(1.08)';
+        clb.style.color = `var(--WDS-content-action-default, ${fallbackActive})`;
       } else {
         setSafeSVG(clb, SVG_INACTIVE);
-        clb.style.filter = 'drop-shadow(0 0 0px transparent)';
-        clb.style.transform = 'scale(1)';
+        clb.style.color = `var(--WDS-content-deemphasized, ${fallbackInactive})`;
       }
     }
 
@@ -270,6 +315,22 @@
       unblurLastNValEl.textContent = this.value;
       chrome.storage.local.set({ unblurLastNCount: parseInt(this.value, 10) });
     });
+
+    // ---- Privacy Mode Toggle ------------------------------------------------
+    const modeBlurBtn = shadow.getElementById('fab-mode-blur');
+    const modeLiteBtn = shadow.getElementById('fab-mode-lite');
+    const modeRedactedBtn = shadow.getElementById('fab-mode-redacted');
+    if (modeBlurBtn && modeLiteBtn && modeRedactedBtn) {
+      modeBlurBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'blur' });
+      });
+      modeLiteBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'lite' });
+      });
+      modeRedactedBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ privacyMode: 'redacted' });
+      });
+    }
 
     // ---- Reset Button ---------------------------------------------------------
     const resetBtn = shadow.getElementById('fab-reset-btn');
@@ -358,6 +419,18 @@
     function injectChatlistBtn() {
       if (document.getElementById(CLB_ID)) return;
 
+      if (!document.getElementById('wa-privacy-clb-style')) {
+        const style = document.createElement('style');
+        style.id = 'wa-privacy-clb-style';
+        style.textContent = `
+          #${CLB_ID}:active {
+            transform: scale(0.85) !important;
+            opacity: 0.6;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
       const anchor = getMediaAnchor();
       if (!anchor) return;
       const { mediaWrapper, navContainer } = anchor;
@@ -373,8 +446,8 @@
         'display:flex', 'align-items:center', 'justify-content:center',
         'width:40px', 'height:40px', 'border:none', 'border-radius:50%',
         'background:transparent', 'cursor:pointer', 'padding:0',
-        `color:${getCLBColor()}`,
-        'transition:background .15s, color .2s, filter .3s cubic-bezier(0.4, 0, 0.2, 1), transform .3s cubic-bezier(0.4, 0, 0.2, 1)',
+        `color:var(--WDS-content-deemphasized, rgba(255,255,255,0.6))`,
+        'transition:background .15s, color .2s, opacity .15s, transform .15s cubic-bezier(0.4, 0, 0.2, 1)',
         'flex-shrink:0',
       ].join(';');
 
@@ -399,7 +472,7 @@
           'align-items:center',
           'transform:translateY(-50%) scale(0.95)',
           'transform-origin:left center',
-          'transition:transform 0.1s cubic-bezier(0, 0, 0.2, 1), opacity 0.1s cubic-bezier(0, 0, 0.2, 1)',
+          'transition:transform 0 cubic-bezier(0, 0, 0.2, 1), opacity 0 cubic-bezier(0, 0, 0.2, 1)',
           'font-family:inherit'
         ].join(';');
         document.body.appendChild(tooltip);
@@ -450,6 +523,11 @@
         tooltip.style.opacity = '0';
       });
 
+      // Stop mousedown propagation so document.mousedown doesn't close the panel
+      clbBtn.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+      });
+
       clbBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         togglePanel(clbBtn.getBoundingClientRect());
@@ -465,7 +543,6 @@
     function syncThemeAndColor() {
       const isDark = document.body.classList.contains('dark');
       const clb = document.getElementById(CLB_ID);
-      if (clb) clb.style.color = getCLBColor();
       // Drive the panel's Material theme via CSS :host([data-theme]) selector
       host.dataset.theme = isDark ? 'dark' : 'light';
       chrome.storage.local.set({ waTheme: isDark ? 'dark' : 'light' });
@@ -477,10 +554,9 @@
 
 
     // Re-inject when WhatsApp SPA rebuilds the chatlist header
-    const clbObserver = new MutationObserver(() => {
+    setInterval(() => {
       if (!document.getElementById(CLB_ID)) injectChatlistBtn();
-    });
-    clbObserver.observe(document.documentElement, { childList: true, subtree: true });
+    }, 1500);
     injectChatlistBtn();
   }
 

@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
   inputOpacity: 30,
   unblurLastN: false,
   unblurLastNCount: 3,
+  privacyMode: 'blur',
 };
 
 /* --------------------------------------------------------------------------
@@ -37,14 +38,6 @@ function buildCSS(settings) {
       ? settings[rule.key]
       : DEFAULT_SETTINGS[rule.key];
 
-    // --- Special: No Transition Delay ---
-    if (rule.special === 'noTransition') {
-      if (isActive) {
-        css += `${ROOT} * { transition: none !important; }\n`;
-      }
-      continue;
-    }
-
     // --- Special: Unblur Override (Injected once manually below loop) ---
 
 
@@ -57,33 +50,65 @@ function buildCSS(settings) {
 
     // --- Opacity mode (Text Input) ---
     if (rule.property === 'opacity') {
+      const opacityTransition = settings.noTransition
+        ? 'transition: none !important;'
+        : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+
+      const hoverOpacityTransition = settings.noTransition
+        ? 'transition-property: opacity !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
+        : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
+        
       css += `
       ${blurSelectors} {
         opacity: var(--wa-input-opacity) !important;
-        transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        will-change: opacity;
+        ${opacityTransition}
       }
       ${hoverSelectors} {
         opacity: 1 !important;
+        ${hoverOpacityTransition}
       }`;
       continue;
     }
 
     // --- Filter/blur mode (everything else) ---
+    const isRedacted = settings.privacyMode === 'redacted';
+    const isLite = settings.privacyMode === 'lite';
+    const isStatic = isRedacted || isLite; // Lite and Redacted both kill JS & transitions
+
     const multiplier = rule.blurMultiplier || 1;
     const blurValue = multiplier === 1
       ? 'var(--wa-blur-amount)'
       : `calc(var(--wa-blur-amount) * ${multiplier})`;
 
+    const filterTransition = (settings.noTransition || isStatic)
+      ? 'transition: none !important;'
+      : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+
+    const hoverFilterTransition = (settings.noTransition || isStatic)
+      ? 'transition: none !important;'
+      : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+
+    const redactedCSS = `
+      filter: brightness(0) !important;
+      color: #000 !important;
+      background-color: #000 !important;
+    `;
+    const redactedHoverCSS = `
+      filter: none !important;
+      color: unset !important;
+      background-color: unset !important;
+    `;
+    const blurCSS = `filter: blur(${blurValue}) !important;`;
+    const blurHoverCSS = `filter: none !important;`;
+
     css += `
     ${blurSelectors} {
-      filter: blur(${blurValue}) !important;
-      transition: ${transition} !important;
-      will-change: filter;
-      transform: translateZ(0);
+      ${isRedacted ? redactedCSS : blurCSS}
+      ${filterTransition}
     }
     ${hoverSelectors} {
-      filter: blur(0px) !important;
+      ${isRedacted ? redactedHoverCSS : blurHoverCSS}
+      ${hoverFilterTransition}
     }`;
 
     // --- hoverParentTargets: blur a child, unblur when PARENT is hovered ---
@@ -93,38 +118,37 @@ function buildCSS(settings) {
         const childHover = `${scope} ${hoverParent}:hover:not(.wa-unblur-override):not(.wa-unblur-override *) ${child}`;
         css += `
         ${childBlur} {
-          filter: blur(${blurValue}) !important;
-          transition: ${transition} !important;
-          will-change: filter;
-          transform: translateZ(0);
+          ${isRedacted ? redactedCSS : blurCSS}
+          ${filterTransition}
         }
         ${childHover} {
-          filter: blur(0px) !important;
+          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
+          ${hoverFilterTransition}
         }`;
       }
     }
 
-    // --- hoverHasTargets: blur a child, unblur only when a SPECIFIC sibling/overlay/child is hovered ---
-    // Uses :has() on a common ancestor. If child is empty, the ancestor itself is blurred.
+    // --- hoverHasTargets: JS-Based hover unblur logic ---
     if (rule.hoverHasTargets && rule.hoverHasTargets.length > 0) {
       for (const { ancestor, hoverTrigger, child } of rule.hoverHasTargets) {
         const childPart = child ? ` ${child}` : '';
-        const childBlur  = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
-        const childHover = `${scope} ${ancestor}:has(${hoverTrigger}:hover):not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
+        const baseSelector = `${scope} ${ancestor}:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`;
+        const hoverSelector = isStatic 
+            ? `${scope} ${ancestor}:hover:not(.wa-unblur-override):not(.wa-unblur-override *)${childPart}`
+            : `${baseSelector}.wa-js-hover-unblur`;
+
         css += `
-        ${childBlur} {
-          filter: blur(${blurValue}) !important;
-          transition: ${transition} !important;
-          will-change: filter;
-          transform: translateZ(0);
+        ${baseSelector}:not(.wa-js-hover-unblur) {
+          ${isRedacted ? redactedCSS : blurCSS}
+          ${filterTransition}
         }
-        ${childHover} {
-          filter: blur(0px) !important;
+        ${hoverSelector} {
+          ${isRedacted ? redactedHoverCSS : blurHoverCSS}
+          ${hoverFilterTransition}
         }`;
       }
     }
   }
-
   return css;
 }
 
@@ -166,6 +190,9 @@ function applySettings(settings) {
   // 4. Manage DOM Observer for "Unblur Last N Messages"
   manageUnblurObserver(settings);
 
+  // 5. Update JS hover delegation rules
+  updateHoverHasRules(settings);
+
   // console.log('[Privacy Blur] Applied settings:', settings);
 }
 
@@ -178,14 +205,14 @@ let unblurInterval = null;
 function applyUnblurLastN() {
   if (currentUnblurN <= 0) return;
   const messages = document.querySelectorAll(`
-    [data-testid="conversation-panel-wrapper"] [data-testid="conversation-panel-messages"] [data-testid="msg-container"],
-    [data-testid="conversation-panel-wrapper"] [data-testid="conversation-panel-messages"] [data-id*="grouped-sticker"]
+    [data-testid="msg-container"],
+    [data-id*="grouped-sticker"]
   `);
-  
+
   // Clean up existing overrides to avoid unnecessary DOM writes
   messages.forEach(el => {
     if (el.classList.contains('wa-unblur-override')) {
-       el.classList.remove('wa-unblur-override');
+      el.classList.remove('wa-unblur-override');
     }
   });
 
@@ -201,7 +228,9 @@ function manageUnblurObserver(settings) {
   const isEnabled = settings.enabled ?? DEFAULT_SETTINGS.enabled;
   const unblurLastN = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
   const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
+  const privacyMode = settings.privacyMode || 'blur';
 
+  // We re-enable the ultra-lightweight JS poller for all modes.
   currentUnblurN = (isEnabled && unblurLastN) ? unblurLastNCount : 0;
 
   if (currentUnblurN > 0) {
@@ -219,6 +248,78 @@ function manageUnblurObserver(settings) {
     document.querySelectorAll('.wa-unblur-override').forEach(el => el.classList.remove('wa-unblur-override'));
   }
 }
+
+// ---------------------------------------------------------------------------
+// JS-Based Hover Delegation for Complex Targets
+// Replaces slow CSS :has(:hover) selectors
+// ---------------------------------------------------------------------------
+let activeHoverHasRules = [];
+let currentJsUnblurTargets = new Set();
+
+function updateHoverHasRules(settings) {
+  activeHoverHasRules = [];
+  const isEnabled = settings.enabled !== undefined ? settings.enabled : DEFAULT_SETTINGS.enabled;
+  const privacyMode = settings.privacyMode || 'blur';
+  if (!isEnabled || privacyMode !== 'blur') {
+    for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
+    currentJsUnblurTargets.clear();
+    return;
+  }
+
+  for (const rule of window.WA_BLUR_RULES) {
+    const isActive = settings[rule.key] !== undefined ? settings[rule.key] : DEFAULT_SETTINGS[rule.key];
+    if (isActive && rule.hoverHasTargets) {
+      activeHoverHasRules.push(...rule.hoverHasTargets);
+    }
+  }
+}
+
+document.addEventListener('mouseover', (e) => {
+  if (activeHoverHasRules.length === 0) return;
+
+  const newTargets = new Set();
+
+  for (const { ancestor, hoverTrigger, child } of activeHoverHasRules) {
+    const triggers = hoverTrigger.split(',').map(t => {
+      const trimmed = t.trim();
+      return `${ancestor}${trimmed.startsWith('>') ? '' : ' '}${trimmed}`;
+    }).join(', ');
+
+    try {
+      const triggerEl = e.target.closest(triggers);
+      if (triggerEl) {
+        const ancestorEl = triggerEl.closest(ancestor);
+        if (ancestorEl) {
+          if (child) {
+            const childSelector = `:scope${child.trim().startsWith('>') ? '' : ' '}${child}`;
+            const childEls = ancestorEl.querySelectorAll(childSelector);
+            childEls.forEach(el => newTargets.add(el));
+          } else {
+            newTargets.add(ancestorEl);
+          }
+        }
+      }
+    } catch (err) {
+      // Ignore dynamically invalid selectors
+    }
+  }
+
+  for (const el of currentJsUnblurTargets) {
+    if (!newTargets.has(el)) el.classList.remove('wa-js-hover-unblur');
+  }
+  for (const el of newTargets) {
+    el.classList.add('wa-js-hover-unblur');
+  }
+
+  currentJsUnblurTargets = newTargets;
+});
+
+document.addEventListener('mouseout', (e) => {
+  if (!e.relatedTarget) {
+    for (const el of currentJsUnblurTargets) el.classList.remove('wa-js-hover-unblur');
+    currentJsUnblurTargets.clear();
+  }
+});
 
 // ---------------------------------------------------------------------------
 // Bootstrap

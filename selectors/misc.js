@@ -12,12 +12,12 @@ window.WA_BLUR_RULES.push(
     blurMultiplier: 2,
     targets: [
       //  Conversation Panel
-      '[data-testid="conversation-panel-messages"] [data-testid="msg-container"] div:has( > span[data-testid="sticker-container"])',
-      '[data-testid="conversation-panel-messages"] [data-id*="grouped-sticker"] div:has( > span[data-testid="sticker-container"])',
-      //  Expression Panel
-      '[data-testid="expressions-panel"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] img)',
-      '[data-testid="expressions-panel"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] svg)',
-      'div:has([class*="html-div"]) [class*="x-default-marker"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] img)',
+      'div:has( > span[data-testid="sticker-container"])',
+      // '[data-testid="conversation-panel-messages"] [data-id*="grouped-sticker"] div:has( > span[data-testid="sticker-container"])',
+      // //  Expression Panel
+      // '[data-testid="expressions-panel"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] img)',
+      // '[data-testid="expressions-panel"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] svg)',
+      // 'div:has([class*="html-div"]) [class*="x-default-marker"] [data-testid="sticker-item"]:has([data-testid="sticker-container"] img)',
     ],
   },
   {
