@@ -84,7 +84,7 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
   <div class="card slider-card">
     <div class="mode-toggle-group" style="display: flex; gap: 12px; padding: 10px 12px;">
       <button type="button" class="mode-btn active" id="fab-mode-blur" style="flex:1; padding: 8px; border-radius: 6px; background: var(--md-primary-dim); color: var(--md-primary); border: 1px solid var(--md-primary); cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">Blur</button>
-      <button type="button" class="mode-btn" id="fab-mode-lite" style="flex:1; padding: 8px; border-radius: 6px; background: transparent; color: var(--md-on-s-var); border: 1px solid var(--md-outline); cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">Lite</button>
+      <button type="button" class="mode-btn" id="fab-mode-lite" style="flex:1; padding: 8px; border-radius: 6px; background: transparent; color: var(--md-on-s-var); border: 1px solid var(--md-outline); cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">Blur Lite</button>
       <button type="button" class="mode-btn" id="fab-mode-redacted" style="flex:1; padding: 8px; border-radius: 6px; background: transparent; color: var(--md-on-s-var); border: 1px solid var(--md-outline); cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">Redacted</button>
     </div>
   </div>
@@ -93,7 +93,7 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
   <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
   </svg>
-  <span>If scrolling feels laggy, switch to Lite or Redacted mode.</span>
+  <span>If scrolling feels laggy, switch to Blur Lite or Redacted mode.</span>
   </div>
 
   <div class="card section-card">
