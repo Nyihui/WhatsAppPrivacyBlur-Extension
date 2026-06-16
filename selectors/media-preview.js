@@ -24,6 +24,7 @@ window.WA_BLUR_RULES.push({
     '[data-testid="media-hub-modal"] [data-testid="media-hub-thumb"]',
     // '[data-testid="media-hub-modal"] [data-testid="popup-contents"] [data-testid="media-hub-thumb"]',
     '[data-testid="media-hub-modal"] [data-focusid="media-hub-row-item"]',
+    '[data-testid="status-thumbnail"] > div',
   ],
   // Blur a child element but reveal it when hovering the PARENT.
   hoverParentTargets: [

@@ -16,12 +16,15 @@ window.WA_PANEL_STYLES = `
     --md-on-s-var:     #8696a0;
     --md-outline:      rgba(255,255,255,0.09);
     --md-outline-var:  rgba(255,255,255,0.04);
-    --md-primary:      #00a884;
-    --md-primary-dim:  rgba(0,168,132,0.12);
+    --md-primary:      #21C063;
+    --md-primary-dim:  #103529;
     --md-error:        #f28b82;
     --md-error-dim:    rgba(242,139,130,0.12);
     --md-elev:         0 4px 16px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.25);
     --md-radius:       8px;
+    --icon-active:     #FAFAFA;
+    --icon-inactive:   rgba(255, 255, 255, 0.6);
+    --switch-active:   #0A0A0A;
 
     position: fixed;
     inset: 0;
@@ -36,14 +39,18 @@ window.WA_PANEL_STYLES = `
     --md-surface:      #ffffff;
     --md-surface-var:  #f5f6f6;
     --md-on-surface:   #111b21;
-    --md-on-s-var:     #667781;
+    // --md-on-s-var:     #667781;
+    --md-on-s-var:     rgba(0, 0, 0, 0.6);
     --md-outline:      rgba(0,0,0,0.10);
     --md-outline-var:  rgba(0,0,0,0.05);
-    --md-primary:      #00a884;
-    --md-primary-dim:  rgba(0,168,132,0.10);
+    --md-primary:      #1DAA61;
+    --md-primary-dim:  #D9FDD3;
     --md-error:        #b3261e;
     --md-error-dim:    rgba(179,38,30,0.08);
     --md-elev:         0 4px 16px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+    --icon-active:     #0A0A0A;
+    --icon-inactive:   rgba(0, 0, 0, 0.6);
+    --switch-active:   #ffffff;
   }
 
   /* ----------------------------------------------------------------- PANEL */
@@ -51,7 +58,7 @@ window.WA_PANEL_STYLES = `
     pointer-events: none;
     visibility: hidden;
     position: fixed;
-    width: 320px;
+    width: 580px;
     max-height: 80vh;
     background: var(--md-bg);
     border: 1px solid var(--md-outline);
@@ -184,7 +191,7 @@ window.WA_PANEL_STYLES = `
 
   /* Section card */
   .section-title {
-    font-size: 10px; font-weight: 500; text-transform: uppercase;
+    font-size: 12px; font-weight: 500; text-transform: uppercase;
     letter-spacing: .8px; color: var(--md-on-s-var);
     padding: 7px 12px 5px;
     border-bottom: 1px solid var(--md-outline-var);
@@ -195,21 +202,45 @@ window.WA_PANEL_STYLES = `
     justify-content: space-between;
     align-items: center;
     padding: 6px 12px;
-    border-bottom: 1px solid var(--md-outline-var);
-    transition: background .15s;
+    position: relative;
   }
-  .control-row:last-child { border-bottom: none; }
-  .control-row:hover { background: rgba(0,168,132,0.05); }
+  .control-row::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; transition: background .15s;
+  }
+  .control-row:hover::after { background: rgba(0,168,132,0.05); }
+
+  .blur-targets-grid {
+    display: flex;
+    gap: 1px;
+    background: var(--md-outline-var);
+    border-top: 1px solid var(--md-outline-var);
+  }
+  .blur-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--md-surface);
+  }
+  .blur-column .control-row {
+    border-bottom: 1px solid var(--md-outline-var);
+  }
+  .blur-column .control-row:last-child {
+    border-bottom: none;
+  }
 
   .row-left { display: flex; align-items: center; gap: 8px; }
   .icon-box {
     display: flex; align-items: center; justify-content: center;
     width: 22px; height: 22px; border-radius: 50%;
-    color: var(--md-on-s-var);
+    color: var(--icon-inactive);
     flex-shrink: 0;
     transition: color .15s;
   }
-  .control-row:hover .icon-box { color: var(--md-primary); }
+  
+  /* When the toggle is ON, use the active color */
+  .control-row:has(input:checked) .icon-box { 
+    color: var(--icon-active); 
+  }
 
   .row-text { display: flex; flex-direction: column; gap: 1px; }
   .row-title { font-size: 12px; font-weight: 400; color: var(--md-on-surface); line-height: 1.2; }
@@ -234,7 +265,7 @@ window.WA_PANEL_STYLES = `
   input:checked + .slider { background: var(--md-primary); border-color: var(--md-primary); }
   input:checked + .slider::before {
     transform: translateX(16px);
-    background: #ffffff;
+    background: var(--WDS-content-on-accent, var(--switch-active));
     width: 14px; height: 14px; left: 1px; bottom: 1px;
   }
   .slider.round                { border-radius: 34px; }

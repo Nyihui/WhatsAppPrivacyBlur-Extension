@@ -72,6 +72,14 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
       <kbd class="keybind">Alt + /</kbd>
     </div>
   </div>
+  
+  <div class="card slider-card" id="fab-blur-intensity-wrapper">
+    <div class="slider-header">
+      <span class="slider-title">Blur Intensity</span>
+      <span class="slider-val" id="fab-blur-val">3px</span>
+    </div>
+    <input type="range" id="fab-blur-intensity" min="2" max="20" value="3" class="range-slider">
+  </div>
 
   <div class="card slider-card">
     <div class="mode-toggle-group" style="display: flex; gap: 12px; padding: 10px 12px;">
@@ -87,17 +95,12 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
   </svg>
   <span>If scrolling feels laggy, switch to Lite or Redacted mode.</span>
   </div>
-  
-  <div class="card slider-card" id="fab-blur-intensity-wrapper">
-    <div class="slider-header">
-      <span class="slider-title">Blur Intensity</span>
-      <span class="slider-val" id="fab-blur-val">3px</span>
-    </div>
-    <input type="range" id="fab-blur-intensity" min="2" max="20" value="3" class="range-slider">
-  </div>
 
   <div class="card section-card">
     <div class="section-title">Blur Targets</div>
+    <div class="blur-targets-grid">
+
+      <div class="blur-column">
 
     ${_fabRow('fab-toggle-avatars', 'Profile Pictures', 'Avatars, status, contact photos',
   '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>')}
@@ -140,6 +143,10 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
       </div>
     </div>
 
+      </div> <!-- End left blur-column -->
+
+      <div class="blur-column">
+
     ${_fabRow('fab-toggle-stickers', 'Stickers', 'Sticker bubbles in chat',
           '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>')}
 
@@ -149,7 +156,7 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
     ${_fabRow('fab-toggle-media-gallery', 'Media Gallery', 'Full-screen viewer &amp; gallery canvas',
               '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>')}
 
-    <div class="control-row control-row--expandable">
+    <div class="control-row control-row--expandable" id="row-fab-toggle-input">
       <div class="row-main">
         <div class="row-left">
           <div class="icon-box">
@@ -182,6 +189,9 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
     ${_fabRow('fab-toggle-no-transition', 'No Transition Delay', 'Instant blur, no fade animation',
                 '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>')}
 
+      </div> <!-- End right blur-column -->
+
+    </div> <!-- End blur-targets-grid -->
   </div>
 
 </div>`;

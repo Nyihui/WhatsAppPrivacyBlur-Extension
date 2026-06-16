@@ -173,6 +173,15 @@
     host.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483647;';
     document.body.appendChild(host);
 
+    function syncTheme() {
+      const isDark = document.body.classList.contains('dark') || document.documentElement.classList.contains('dark');
+      host.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+    syncTheme();
+    const themeObserver = new MutationObserver(syncTheme);
+    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
     const shadow = host.attachShadow({ mode: 'open' });
     const CLB_ID = 'wa-privacy-clb';
 
@@ -217,10 +226,16 @@
     function updateCLBGlow() {
       const clb = document.getElementById(CLB_ID);
       if (!clb) return;
+      const isDark = document.body.classList.contains('dark');
+      const fallbackActive = isDark ? '#FAFAFA' : '#0A0A0A';
+      const fallbackInactive = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)';
+
       if (isOpen) {
         setSafeSVG(clb, SVG_ACTIVE);
+        clb.style.color = `var(--WDS-content-action-default, ${fallbackActive})`;
       } else {
         setSafeSVG(clb, SVG_INACTIVE);
+        clb.style.color = `var(--WDS-content-deemphasized, ${fallbackInactive})`;
       }
     }
 
@@ -431,7 +446,7 @@
         'display:flex', 'align-items:center', 'justify-content:center',
         'width:40px', 'height:40px', 'border:none', 'border-radius:50%',
         'background:transparent', 'cursor:pointer', 'padding:0',
-        `color:${getCLBColor()}`,
+        `color:var(--WDS-content-deemphasized, rgba(255,255,255,0.6))`,
         'transition:background .15s, color .2s, opacity .15s, transform .15s cubic-bezier(0.4, 0, 0.2, 1)',
         'flex-shrink:0',
       ].join(';');
@@ -508,6 +523,11 @@
         tooltip.style.opacity = '0';
       });
 
+      // Stop mousedown propagation so document.mousedown doesn't close the panel
+      clbBtn.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+      });
+
       clbBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         togglePanel(clbBtn.getBoundingClientRect());
@@ -523,7 +543,6 @@
     function syncThemeAndColor() {
       const isDark = document.body.classList.contains('dark');
       const clb = document.getElementById(CLB_ID);
-      if (clb) clb.style.color = getCLBColor();
       // Drive the panel's Material theme via CSS :host([data-theme]) selector
       host.dataset.theme = isDark ? 'dark' : 'light';
       chrome.storage.local.set({ waTheme: isDark ? 'dark' : 'light' });

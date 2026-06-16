@@ -13,7 +13,7 @@ window.WA_BLUR_RULES.push({
     //  Conversation Media
     '[data-testid="media-video"]',
     '[data-testid="media-zoomable"]',
-    '[data-testid="media-gif"]',
+    // '[data-testid="media-gif"]',
     '[data-testid="drawer-middle"] [data-animate-attach-media="true"] > div > div > div',
   ],
   hoverHasTargets: [
