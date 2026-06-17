@@ -10,5 +10,8 @@ window.WA_BLUR_RULES.push({
   property: 'opacity',
   targets: [
     'div[class*="lexical-rich-text-input"] | up:1',
+
+    //  Update 18/06/2026
+    'div | has:> div > [data-lexical-editor="true"]'
   ],
 });

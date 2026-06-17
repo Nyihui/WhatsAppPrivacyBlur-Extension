@@ -3,7 +3,8 @@
    Depends on: selectors/ (loaded first via manifest.json)
    ========================================================================== */
 
-const DEFAULT_SETTINGS = {
+window.WAPanel = window.WAPanel || {};
+window.WAPanel.DEFAULT_SETTINGS = {
   enabled: true,
   blurAmount: 3,
   blurAvatars: true,
@@ -14,7 +15,8 @@ const DEFAULT_SETTINGS = {
   blurMediaPreview: true,
   blurMediaGallery: true,
   blurInput: true,
-  noTransition: false,
+  animation: true,
+  animationDuration: 0.25,
   inputOpacity: 30,
   unblurLastN: false,
   unblurLastNCount: 3,
@@ -25,18 +27,17 @@ const DEFAULT_SETTINGS = {
    CSS Generator
    Iterates WA_BLUR_RULES from selectors.js and builds a complete stylesheet.
    Hover-reveal selectors are auto-generated — no manual duplication needed.
--------------------------------------------------------------------------- */
+ -------------------------------------------------------------------------- */
 function buildCSS(settings) {
   const ROOT = '.wa-privacy-enabled';
-  const transition = settings.noTransition
-    ? 'none'
-    : 'filter 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+  const hasAnimation = settings.animation !== undefined ? settings.animation : window.WAPanel.DEFAULT_SETTINGS.animation;
+  const duration = settings.animationDuration !== undefined ? settings.animationDuration : window.WAPanel.DEFAULT_SETTINGS.animationDuration;
   let css = '';
 
   window.WA_BLUR_RULES.forEach((rule, ruleIndex) => {
     const isActive = settings[rule.key] !== undefined
       ? settings[rule.key]
-      : DEFAULT_SETTINGS[rule.key];
+      : window.WAPanel.DEFAULT_SETTINGS[rule.key];
 
     // --- Special: Unblur Override (Injected once manually below loop) ---
 
@@ -73,13 +74,13 @@ function buildCSS(settings) {
 
     // --- Opacity mode (Text Input) ---
     if (rule.property === 'opacity') {
-      const opacityTransition = settings.noTransition
+      const opacityTransition = !hasAnimation
         ? 'transition: none !important;'
-        : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+        : `transition-property: opacity !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;`;
 
-      const hoverOpacityTransition = settings.noTransition
+      const hoverOpacityTransition = !hasAnimation
         ? 'transition-property: opacity !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
-        : 'transition-property: opacity !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;';
+        : `transition-property: opacity !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;`;
 
       css += `
       ${blurSelectors} {
@@ -102,13 +103,13 @@ function buildCSS(settings) {
       ? 'var(--wa-blur-amount)'
       : `calc(var(--wa-blur-amount) * ${multiplier})`;
 
-    const filterTransition = settings.noTransition
+    const filterTransition = !hasAnimation
       ? 'transition: none !important;'
-      : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+      : `transition-property: filter, color, background-color !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;`;
 
-    const hoverFilterTransition = settings.noTransition
+    const hoverFilterTransition = !hasAnimation
       ? 'transition: none !important;'
-      : 'transition-property: filter, color, background-color !important; transition-duration: 0.25s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;';
+      : `transition-property: filter, color, background-color !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;`;
 
     const redactedCSS = `
       filter: brightness(0) !important;
@@ -176,17 +177,21 @@ function injectCSS(css) {
    Applies CSS variables, toggles the master class, and rebuilds the stylesheet.
 -------------------------------------------------------------------------- */
 function applySettings(settings) {
+  if (settings.unblurLastNCount !== undefined && settings.unblurLastNCount > 10) {
+    settings.unblurLastNCount = 10;
+    chrome.storage.local.set({ unblurLastNCount: 10 });
+  }
   currentSettings = settings;
   const root = document.documentElement;
 
   // 1. CSS custom properties
-  const blurPx = settings.blurAmount !== undefined ? settings.blurAmount : DEFAULT_SETTINGS.blurAmount;
-  const opacityPct = settings.inputOpacity !== undefined ? settings.inputOpacity : DEFAULT_SETTINGS.inputOpacity;
+  const blurPx = settings.blurAmount !== undefined ? settings.blurAmount : window.WAPanel.DEFAULT_SETTINGS.blurAmount;
+  const opacityPct = settings.inputOpacity !== undefined ? settings.inputOpacity : window.WAPanel.DEFAULT_SETTINGS.inputOpacity;
   root.style.setProperty('--wa-blur-amount', `${blurPx}px`);
   root.style.setProperty('--wa-input-opacity', (opacityPct / 100).toFixed(2));
 
   // 2. Master privacy class
-  const isEnabled = settings.enabled !== undefined ? settings.enabled : DEFAULT_SETTINGS.enabled;
+  const isEnabled = settings.enabled !== undefined ? settings.enabled : window.WAPanel.DEFAULT_SETTINGS.enabled;
   root.classList.toggle('wa-privacy-enabled', isEnabled);
 
   // 3. Generate & inject dynamic stylesheet
@@ -203,11 +208,16 @@ function applySettings(settings) {
 // ---------------------------------------------------------------------------
 let currentUnblurN = 0;
 let domObserver = null;
-let domRAF = null;
-let currentSettings = DEFAULT_SETTINGS;
+let currentSettings = window.WAPanel.DEFAULT_SETTINGS;
 
 function applyUnblurLastN() {
-  if (currentUnblurN <= 0) return;
+  if (currentUnblurN <= 0) {
+    const overrides = document.querySelectorAll('.wa-unblur-override');
+    overrides.forEach(el => {
+      el.classList.remove('wa-unblur-override');
+    });
+    return;
+  }
   const messages = document.querySelectorAll(`
     [data-testid="msg-container"],
     [data-id*="grouped-sticker"]
@@ -285,11 +295,11 @@ function evaluatePipeline(targetStr) {
 
 function applyJsTargets() {
   const settings = currentSettings;
-  const isEnabled = settings.enabled ?? DEFAULT_SETTINGS.enabled;
+  const isEnabled = settings.enabled ?? window.WAPanel.DEFAULT_SETTINGS.enabled;
   if (!isEnabled) return;
 
   window.WA_BLUR_RULES.forEach((rule, ruleIndex) => {
-    const isActive = settings[rule.key] !== undefined ? settings[rule.key] : DEFAULT_SETTINGS[rule.key];
+    const isActive = settings[rule.key] !== undefined ? settings[rule.key] : window.WAPanel.DEFAULT_SETTINGS[rule.key];
     if (!isActive) return;
 
     if (rule.targets) {
@@ -344,11 +354,11 @@ function applyDomUpdates() {
 }
 
 function scheduleDomUpdates() {
-  if (domRAF) return; // Already scheduled
-  domRAF = requestAnimationFrame(() => {
+  if (updateTimeout) return; // Already scheduled
+  updateTimeout = setTimeout(() => {
     applyDomUpdates();
-    domRAF = null;
-  });
+    updateTimeout = null;
+  }, 50);
 }
 
 let observer = null;
@@ -382,9 +392,9 @@ function startObserver() {
 }
 
 function manageUnblurObserver(settings) {
-  const isEnabled = settings.enabled ?? DEFAULT_SETTINGS.enabled;
-  const unblurLastN = settings.unblurLastN ?? DEFAULT_SETTINGS.unblurLastN;
-  const unblurLastNCount = settings.unblurLastNCount ?? DEFAULT_SETTINGS.unblurLastNCount;
+  const isEnabled = settings.enabled ?? window.WAPanel.DEFAULT_SETTINGS.enabled;
+  const unblurLastN = settings.unblurLastN ?? window.WAPanel.DEFAULT_SETTINGS.unblurLastN;
+  const unblurLastNCount = settings.unblurLastNCount ?? window.WAPanel.DEFAULT_SETTINGS.unblurLastNCount;
 
   currentUnblurN = (isEnabled && unblurLastN) ? unblurLastNCount : 0;
 
@@ -396,9 +406,9 @@ function manageUnblurObserver(settings) {
       observer.disconnect();
       observer = null;
     }
-    if (domRAF) {
-      cancelAnimationFrame(domRAF);
-      domRAF = null;
+    if (updateTimeout) {
+      clearTimeout(updateTimeout);
+      updateTimeout = null;
     }
     // Cleanup overrides if toggled off
     document.querySelectorAll('.wa-unblur-override').forEach(el => el.classList.remove('wa-unblur-override'));
@@ -410,7 +420,7 @@ function manageUnblurObserver(settings) {
 // ---------------------------------------------------------------------------
 
 // Load and apply on page start
-chrome.storage.local.get(window.WA_DEFAULT_SETTINGS, applySettings);
+chrome.storage.local.get(window.WAPanel.DEFAULT_SETTINGS, applySettings);
 
 // 1. Message from popup (immediate, low-latency path)
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -423,7 +433,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // 2. Storage change (sync path — covers keyboard shortcut + cross-tab changes)
 chrome.storage.onChanged.addListener((_changes, areaName) => {
   if (areaName === 'local') {
-    chrome.storage.local.get(DEFAULT_SETTINGS, applySettings);
+    chrome.storage.local.get(window.WAPanel.DEFAULT_SETTINGS, applySettings);
   }
 });
 
@@ -431,8 +441,8 @@ chrome.storage.onChanged.addListener((_changes, areaName) => {
 window.addEventListener('keydown', (event) => {
   if (event.altKey && (event.key === '/' || event.code === 'Slash')) {
     event.preventDefault();
-    chrome.storage.local.get(DEFAULT_SETTINGS, (settings) => {
-      const isEnabled = settings.enabled !== undefined ? settings.enabled : DEFAULT_SETTINGS.enabled;
+    chrome.storage.local.get(window.WAPanel.DEFAULT_SETTINGS, (settings) => {
+      const isEnabled = settings.enabled !== undefined ? settings.enabled : window.WAPanel.DEFAULT_SETTINGS.enabled;
       chrome.storage.local.set({ enabled: !isEnabled }, () => {
         // console.log(`[Privacy Blur] Shield toggled via Alt+/. New state: ${!isEnabled}`);
       });
