@@ -212,7 +212,10 @@ let currentSettings = window.WAPanel.DEFAULT_SETTINGS;
 
 function applyUnblurLastN() {
   if (currentUnblurN <= 0) {
-    const overrides = document.querySelectorAll('.wa-unblur-override');
+    const overrides = document.querySelectorAll(`
+      [data-testid="msg-container"].wa-unblur-override,
+      [data-id*="grouped-sticker"].wa-unblur-override
+    `);
     overrides.forEach(el => {
       el.classList.remove('wa-unblur-override');
     });

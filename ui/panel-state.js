@@ -15,25 +15,30 @@ window.WAPanel.positionPanel = function (panel, anchorRect) {
 
   const panelW = panel.offsetWidth || 540;
 
-  // 1. Horizontal position: beside the icon
+  // 1. Horizontal position: Position the panel beside the button (left for RTL, right for LTR)
+  //    and apply a 12px directional offset (shift left for RTL, right for LTR).
   let left = isRTL
-    ? anchorLeft - panelW - window.WAPanel.PANEL_GAP
-    : anchorRight + window.WAPanel.PANEL_GAP;
+    ? anchorLeft - panelW - window.WAPanel.PANEL_GAP - 12
+    : anchorRight + window.WAPanel.PANEL_GAP + 12;
 
+  //    Clamp the calculated position within the safe screen boundaries (respecting EDGE_MARGIN)
+  //    to prevent the panel from overflowing or being cut off on either side.
   left = Math.max(window.WAPanel.EDGE_MARGIN, Math.min(left, vw - panelW - window.WAPanel.EDGE_MARGIN));
-  panel.style.left = `calc(${left}px + 12px)`;
+  panel.style.left = `${left}px`;
   panel.style.right = '';
 
-  // 2. Vertical position: align bottom of panel with bottom of button
+  // 2. Vertical position: Align the bottom edge of the panel with the bottom edge of the anchor button.
   const bottom = vh - anchorBottom;
   panel.style.bottom = `${bottom}px`;
   panel.style.top = '';
 
-  // 3. Max height: from bottom of panel to top of screen
+  // 3. Max height constraint: Limit the panel height from its bottom edge to the top of the screen
+  //    (minus the EDGE_MARGIN) or 85% of the viewport height, whichever is smaller, to prevent overflow.
   const maxAvailHeight = anchorBottom - window.WAPanel.EDGE_MARGIN;
   panel.style.maxHeight = `${Math.min(maxAvailHeight, vh * 0.85)}px`;
 
-  // 4. Transform origin: bottom corner closest to the button
+  // 4. Transform origin: Set the origin to the bottom corner closest to the button
+  //    (bottom-right for RTL, bottom-left for LTR) for a clean zoom animation.
   panel.style.transformOrigin = isRTL ? 'bottom right' : 'bottom left';
 };
 
