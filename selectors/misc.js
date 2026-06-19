@@ -11,13 +11,7 @@ window.WA_BLUR_RULES.push(
     property: 'filter',
     blurMultiplier: 2,
     targets: [
-      //  Conversation Panel
-      'span[data-testid="sticker-container"] | closest:div',
-      // 'span[data-testid="sticker-container"] | closest:[data-id*="grouped-sticker"] | find:> div', // approximated
-      // //  Expression Panel
-      // '[data-testid="sticker-container"] img | closest:[data-testid="sticker-item"]',
-      // '[data-testid="sticker-container"] svg | closest:[data-testid="sticker-item"]',
-      // '[data-testid="sticker-container"] img | closest:[data-testid="sticker-item"]',
+      'span[data-testid="sticker-container"] | closest:div'
     ],
   },
   {

@@ -157,9 +157,32 @@ window.WAPanel.mount = function() {
   new MutationObserver(() => window.WAPanel.syncThemeAndColor(host))
     .observe(document.body, { attributeFilter: ['class'] });
 
-  setInterval(() => {
-    if (!document.getElementById(window.WAPanel.CLB_ID)) window.WAPanel.injectChatlistBtn(panel, shadow);
-  }, 2000);
+  // Re-inject sidebar button when WhatsApp re-renders the sidebar,
+  // instead of polling every 2 seconds with setInterval.
+  const sidebarObserver = new MutationObserver(() => {
+    if (!document.getElementById(window.WAPanel.CLB_ID)) {
+      window.WAPanel.injectChatlistBtn(panel, shadow);
+    }
+  });
+
+  const startSidebarObserver = () => {
+    const header = document.querySelector('[data-testid="chatlist-header"]');
+    if (header) {
+      sidebarObserver.observe(header, { childList: true, subtree: true });
+    } else {
+      // Header not yet in DOM — wait for it
+      const bodyObs = new MutationObserver(() => {
+        const h = document.querySelector('[data-testid="chatlist-header"]');
+        if (h) {
+          bodyObs.disconnect();
+          sidebarObserver.observe(h, { childList: true, subtree: true });
+          window.WAPanel.injectChatlistBtn(panel, shadow);
+        }
+      });
+      bodyObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+    }
+  };
+  startSidebarObserver();
   window.WAPanel.injectChatlistBtn(panel, shadow);
 };
 
