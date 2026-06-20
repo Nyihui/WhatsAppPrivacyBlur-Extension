@@ -26,9 +26,9 @@ window.WA_BLUR_RULES.push({
     '[data-testid="conversation-info-header"] > div:first-child',
     '[data-testid="conversation-info-header"] [data-testid="chat-subtitle"] | has:span',
     //  Conversation Panel - Messages
-    'span[data-testid="author"] | closest:div',
+    'div | has:> span[data-testid="author"]:not([data-testid="quoted-message"] *)',
     '[data-testid="vcard-msg"] > div:nth-child(2)',
-    '[data-testid="chat-msg-symbol"] [data-testid="person-refreshed-outline-thin"] | closest:div[role="button"]',
+    // '[data-testid="chat-msg-symbol"] [data-testid="person-refreshed-outline-thin"] | closest:div[role="button"]',
     //  Right Sidebar - Chat Info Drawer
     'span[data-testid*="contact-info-subtitle"] | up:5',
     'span[data-testid="group-info-drawer-subject-input-read-only selectable-text"] | closest:div',

@@ -272,6 +272,24 @@ window.WA_PANEL_STYLES = `
   .master-switch input:not(:checked) + .slider { background: var(--md-surface-var); border-color: var(--md-error); }
   .master-switch input:not(:checked) + .slider::before { background: var(--md-error); }
 
+  /* Hover animations: expand inner circle (knob) width by 2px */
+  .switch:hover .slider::before {
+    width: 12px;
+  }
+  .switch:hover input:checked + .slider::before {
+    width: 16px;
+    transform: translateX(14px);
+  }
+
+  /* Prevent hover expansion on row switches when main shield is OFF */
+  .dashboard.shield-off .row-switch:hover .slider::before {
+    width: 10px;
+  }
+  .dashboard.shield-off .row-switch:hover input:checked + .slider::before {
+    width: 14px;
+    transform: translateX(16px);
+  }
+
   /* ---------------------------------------------------------- RANGE SLIDER */
   .range-slider {
     -webkit-appearance: none;

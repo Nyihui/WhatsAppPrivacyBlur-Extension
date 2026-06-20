@@ -39,13 +39,12 @@ window.WA_BLUR_RULES.push(
       '[data-testid="group-chat-profile-picture"]',
       '[data-testid="group-notification-context-card-photo"]',
       '[data-testid="conversation-panel-messages"] [data-testid="vcard-msg"] img',
-      '[data-testid="chat-msg-symbol"] | closest:[data-testid="quoted-message"] | find:img',
-      '[data-testid="ptt-status"] | closest:div | closest:div | closest:div | closest:div | closest:[data-testid="msg-container"] | find:> div:first-child',
       'div | has:> div > div > div > [data-testid="ptt-status"] | find:> div:first-child',
 
       //  Right Sidebar - Chat Info Drawer
       '[data-testid="chat-info-drawer"] > :nth-child(2) [class*="html-span"] | has:img',
-      '[tabindex="-1"] > button[data-testid="group-pic-picker"] | up:2',
+      // '[data-testid="chat-info-drawer"] [tabindex="-1"] > button[data-testid="group-pic-picker"] | up:2',
+      '[data-testid="chat-info-drawer"] div | has:> [tabindex="-1"] > button[data-testid="group-pic-picker"] | not-has:[data-testid="default-group-refreshed"] *',
 
       //  Right Sidebar - Group's Media/Docs/Links
       '[data-testid="link-gallery-msg"] > div:first-child > div:first-child > div:first-child',
