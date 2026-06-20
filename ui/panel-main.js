@@ -48,7 +48,7 @@ window.WAPanel.mount = function() {
     if (!window.WAPanel.isOpen) return;
     const path = e.composedPath();
     if (path.includes(panel)) return;
-    const clb = document.getElementById(window.WAPanel.CLB_ID);
+    const clb = window.WAPanel.clbBtn;
     if (clb && path.includes(clb)) return;
     window.WAPanel.closePanel(panel);
   });
@@ -132,8 +132,8 @@ window.WAPanel.mount = function() {
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message.action === 'togglePanel') {
-      const clb = document.getElementById(window.WAPanel.CLB_ID);
-      const rect = clb ? clb.getBoundingClientRect() : null;
+      const placeholder = document.getElementById('wa-privacy-clb-placeholder');
+      const rect = placeholder ? placeholder.getBoundingClientRect() : (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null);
       window.WAPanel.togglePanel(panel, rect, shadow);
       return;
     }
@@ -150,7 +150,8 @@ window.WAPanel.mount = function() {
   });
 
   window.addEventListener('resize', () => {
-    if (window.WAPanel.isOpen && window.WAPanel.currentAnchorRect) window.WAPanel.positionPanel(panel, window.WAPanel.currentAnchorRect);
+    if (window.WAPanel.positionCLBBtn) window.WAPanel.positionCLBBtn();
+    if (window.WAPanel.isOpen && window.WAPanel.currentAnchorRect) window.WAPanel.positionPanel(panel);
   });
 
   window.WAPanel.syncThemeAndColor(host); 
@@ -160,8 +161,15 @@ window.WAPanel.mount = function() {
   // Re-inject sidebar button when WhatsApp re-renders the sidebar,
   // instead of polling every 2 seconds with setInterval.
   const sidebarObserver = new MutationObserver(() => {
-    if (!document.getElementById(window.WAPanel.CLB_ID)) {
+    if (!document.getElementById('wa-privacy-clb-placeholder')) {
       window.WAPanel.injectChatlistBtn(panel, shadow);
+    } else {
+      if (window.WAPanel.positionCLBBtn) {
+        window.WAPanel.positionCLBBtn();
+        if (window.WAPanel.isOpen) {
+          window.WAPanel.positionPanel(panel);
+        }
+      }
     }
   });
 
@@ -184,6 +192,16 @@ window.WAPanel.mount = function() {
   };
   startSidebarObserver();
   window.WAPanel.injectChatlistBtn(panel, shadow);
+
+  // Set up a lightweight, periodic interval as a failsafe fallback
+  setInterval(() => {
+    if (window.WAPanel.positionCLBBtn) {
+      window.WAPanel.positionCLBBtn();
+      if (window.WAPanel.isOpen) {
+        window.WAPanel.positionPanel(panel);
+      }
+    }
+  }, 200);
 };
 
 if (document.body) {

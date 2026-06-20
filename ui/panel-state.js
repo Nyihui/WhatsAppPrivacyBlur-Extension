@@ -4,12 +4,18 @@ window.WAPanel.PANEL_GAP = 8;
 window.WAPanel.EDGE_MARGIN = 12;
 
 window.WAPanel.positionPanel = function (panel, anchorRect) {
+  const placeholder = document.getElementById('wa-privacy-clb-placeholder');
+  const rect = (placeholder && placeholder.getBoundingClientRect().width > 0)
+    ? placeholder.getBoundingClientRect()
+    : (anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null));
+  if (!rect) return;
+
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  const anchorBottom = anchorRect.bottom;
-  const anchorLeft = anchorRect.left;
-  const anchorRight = anchorRect.right;
+  const anchorBottom = rect.bottom;
+  const anchorLeft = rect.left;
+  const anchorRight = rect.right;
 
   const isRTL = window.WAPanel.checkRTL();
 
@@ -46,7 +52,11 @@ window.WAPanel.isOpen = false;
 window.WAPanel.currentAnchorRect = null;
 
 window.WAPanel.openPanel = function (panel, anchorRect, shadow) {
-  window.WAPanel.currentAnchorRect = anchorRect || window.WAPanel.currentAnchorRect;
+  const placeholder = document.getElementById('wa-privacy-clb-placeholder');
+  const rect = (placeholder && placeholder.getBoundingClientRect().width > 0)
+    ? placeholder.getBoundingClientRect()
+    : (anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null));
+  window.WAPanel.currentAnchorRect = rect || window.WAPanel.currentAnchorRect;
   if (!window.WAPanel.currentAnchorRect) return;
   window.WAPanel.isOpen = true;
   window.WAPanel.positionPanel(panel, window.WAPanel.currentAnchorRect);

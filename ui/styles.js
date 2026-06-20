@@ -382,4 +382,34 @@ window.WA_PANEL_STYLES = `
   .dashboard.shield-off .range-slider::-moz-range-thumb     { cursor: not-allowed; }
   .dashboard.shield-off .row-switch input:checked + .slider { opacity: .4; cursor: not-allowed; }
   .dashboard.shield-off .row-switch .slider                 { cursor: not-allowed; }
+
+  /* Privacy Blur Toggle Button inside shadow DOM */
+  #wa-privacy-clb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background .15s, color .2s, opacity .15s, transform .15s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    position: fixed;
+    pointer-events: auto;
+    z-index: 2147483647;
+    color: var(--icon-inactive);
+  }
+  #wa-privacy-clb:hover {
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) rgba(255, 255, 255, 0.1) !important;
+  }
+  :host([data-theme="light"]) #wa-privacy-clb:hover {
+    background: linear-gradient(rgba(194, 189, 184, 0.1), rgba(194, 189, 184, 0.1)) rgba(194, 189, 184, 0.15) !important;
+  }
+  #wa-privacy-clb:active {
+    transform: scale(0.85) !important;
+    opacity: 0.6;
+  }
 `;
