@@ -11,10 +11,10 @@ window.WA_BLUR_RULES.push({
   blurMultiplier: 1,
   targets: [
     //  Conversation Panel
-    '[data-testid="media-url-provider"]:not([data-testid="media-hub-thumb"] * )',
+    '[data-testid="media-url-provider"]:not([data-testid="media-hub-thumb"] *, [data-testid="quoted-message"] *)',
     '[data-testid="link-preview-container"]',
     '[data-testid="document-thumb"]',
-    '[data-testid="quoted-message"] > div > div:last-child [style*="background-image: url"] | up:1',
+    // '[data-testid="quoted-message"] > div > div:last-child [style*="background-image: url"] | up:1',
     // //  Media List on Fullscreen View
     '[role="list"] [role="listitem"] [role="tab"] img | closest:div',
     // //  Media Hub Dialog

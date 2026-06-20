@@ -10,7 +10,7 @@ window.WA_BLUR_RULES.push({
   property: 'filter',
   blurMultiplier: 1,
   targets: [
-    '[data-testid="msg-container"] div | has:> span[data-testid*="selectable-text"]',
+    '[data-testid="msg-container"] div | has:> span[data-testid*="selectable-text"]:not([data-testid="quoted-message"] *)',
     '[data-testid="recalled"] | up:2',
     'div[class*="copyable-text"] | up:1 | has:p',
     'div[data-testid*="selectable-text"] | up:1 | has:img',
@@ -20,6 +20,7 @@ window.WA_BLUR_RULES.push({
     '[role="button"][aria-label="Close"] | up:1 | find:> div:nth-child(2) | has:span',
     '[data-testid="media-caption"]',
     'span[data-testid="selectable-text"] | closest:div | has:[data-testid="link-preview-container"]',
+    'div | has:> [data-testid="quoted-message"]',
 
     //  Group Descriptions
     '[data-testid="conversation-subheader"] > div > div > div:nth-child(2)',
