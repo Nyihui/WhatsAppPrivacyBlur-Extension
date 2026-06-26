@@ -115,13 +115,17 @@ function buildCSS(settings) {
       filter: brightness(0) !important;
       color: #000 !important;
       background-color: #000 !important;
+      will-change: filter !important;
     `;
     const redactedHoverCSS = `
       filter: none !important;
       color: unset !important;
       background-color: unset !important;
     `;
-    const blurCSS = `filter: blur(${blurValue}) !important;`;
+    const blurCSS = `
+      filter: blur(${blurValue}) !important;
+      will-change: filter !important;
+    `;
     const blurHoverCSS = `filter: none !important;`;
 
     css += `
@@ -226,30 +230,63 @@ function applyUnblurLastN() {
     [data-id*="grouped-sticker"]
   `);
 
-  // Clean up existing overrides to avoid unnecessary DOM writes
-  messages.forEach(el => {
-    if (el.classList.contains('wa-unblur-override')) {
-      el.classList.remove('wa-unblur-override');
+  // Only remove overrides from messages that are no longer in the last N
+  const start = Math.max(0, messages.length - currentUnblurN);
+  for (let i = 0; i < start; i++) {
+    if (messages[i].classList.contains('wa-unblur-override')) {
+      messages[i].classList.remove('wa-unblur-override');
     }
-  });
+  }
 
   if (messages.length === 0) return;
 
-  const start = Math.max(0, messages.length - currentUnblurN);
+  // Add overrides ONLY if they don't already have it
   for (let i = start; i < messages.length; i++) {
-    messages[i].classList.add('wa-unblur-override');
+    if (!messages[i].classList.contains('wa-unblur-override')) {
+      messages[i].classList.add('wa-unblur-override');
+    }
   }
 }
 
 function evaluatePipeline(targetStr) {
   if (typeof targetStr !== 'string' || !targetStr.includes('|')) return [];
   const parts = targetStr.split('|').map(s => s.trim());
-  const triggerSelector = parts[0];
-  const commands = parts.slice(1);
+  let triggerSelector = parts[0];
+  const originalCommands = parts.slice(1);
+  let commands = [];
   let results = [];
+
+  // OPTIMIZATION: Fold leading `has` and `not-has` commands natively into the CSS selector
+  // to avoid massive JavaScript iteration loops on generic selectors like 'div'.
+  let folding = true;
+  for (const cmd of originalCommands) {
+    if (folding) {
+      const colonIdx = cmd.indexOf(':');
+      const action = colonIdx > -1 ? cmd.substring(0, colonIdx).trim() : cmd.trim();
+      let value = colonIdx > -1 ? cmd.substring(colonIdx + 1).trim() : '';
+
+      if (action === 'has') {
+        triggerSelector += `:has(${value})`;
+        continue;
+      } else if (action === 'not-has') {
+        triggerSelector += `:not(:has(${value}))`;
+        continue;
+      } else {
+        folding = false;
+      }
+    }
+    commands.push(cmd);
+  }
 
   try {
     const elements = document.querySelectorAll(triggerSelector);
+    
+    // OPTIMIZATION: If all commands were folded into the CSS string natively,
+    // we can completely skip the JavaScript element-by-element iteration.
+    if (commands.length === 0) {
+      return Array.from(elements);
+    }
+
     elements.forEach(el => {
       let current = el;
       let isValid = true;

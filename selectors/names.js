@@ -13,6 +13,7 @@ window.WA_BLUR_RULES.push({
 
     // EXPERIMENTAL
     '[role="gridcell"] [data-testid="cell-frame-title"]',
+    '[data-testid="recent-search-item"] > :last-child',
 
     //  Me Tab Drawer Sidebar
     '[data-testid="me-tab-drawer"] [data-testid="drawer-title-body"]',
@@ -28,7 +29,6 @@ window.WA_BLUR_RULES.push({
     //  Conversation Panel - Messages
     'div | has:> span[data-testid="author"]:not([data-testid="quoted-message"] *)',
     '[data-testid="vcard-msg"] > div:nth-child(2)',
-    // '[data-testid="chat-msg-symbol"] [data-testid="person-refreshed-outline-thin"] | closest:div[role="button"]',
     //  Right Sidebar - Chat Info Drawer
     'span[data-testid*="contact-info-subtitle"] | up:5',
     'span[data-testid="group-info-drawer-subject-input-read-only selectable-text"] | closest:div',

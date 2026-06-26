@@ -19,13 +19,6 @@ desktop.ini
 # ============================================================
 .vscode/
 .idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*.sublime-workspace
-*.sublime-project
 
 # ============================================================
 # Node / npm (if tooling is ever added)
