@@ -28,6 +28,8 @@ window.WA_BLUR_RULES.push(
 
       //  Status Sidebar
       '[data-testid="status-tab-drawer"] [data-testid="status-header-add-status"] img[src*="https://media"]',
+      //  Update 02-07-2026 || Self-Profile status locator
+      '[data-testid="status-header"] div | has:> img',
 
       //  Status Player
       '[data-testid="status-player-uie"] img[src*="https"]:not([data-testid="sticker-item"] *, [data-testid="status-emoji-bar"] *, [style*="position: absolute"] *)',
@@ -40,6 +42,10 @@ window.WA_BLUR_RULES.push(
       '[data-testid="group-notification-context-card-photo"]',
       '[data-testid="conversation-panel-messages"] [data-testid="vcard-msg"] img',
       'div | has:> div > div > div > [data-testid="ptt-status"] | find:> div:first-child',
+
+      //  Conversation Panel - Reactions
+      'div:has( > [data-testid="reaction-count-header"]) > div:last-child [data-testid*="list-item-"] [data-testid="reactions-details-cell-me"] > div:first-child div | has:> img',
+      'div:has( > [data-testid="reaction-count-header"]) > div:last-child [data-testid*="list-item-"] [data-testid="reactions-details-cell-not-me"] > div:first-child div | has:> img',
 
       //  Right Sidebar - Chat Info Drawer
       '[data-testid="chat-info-drawer"] > :nth-child(2) [class*="html-span"] | has:img',

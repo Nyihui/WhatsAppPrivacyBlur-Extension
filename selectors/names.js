@@ -29,6 +29,9 @@ window.WA_BLUR_RULES.push({
     //  Conversation Panel - Messages
     'div | has:> span[data-testid="author"]:not([data-testid="quoted-message"] *)',
     '[data-testid="vcard-msg"] > div:nth-child(2)',
+    //  Conversation Panel - Reactions
+    'div:has( > [data-testid="reaction-count-header"]) > div:last-child [data-testid*="list-item-"] [data-testid="cell-frame-secondary"]',
+
     //  Right Sidebar - Chat Info Drawer
     'span[data-testid*="contact-info-subtitle"] | up:5',
     'span[data-testid="group-info-drawer-subject-input-read-only selectable-text"] | closest:div',
