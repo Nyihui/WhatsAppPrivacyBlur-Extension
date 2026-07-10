@@ -17,10 +17,14 @@ window.WA_BLUR_RULES.push({
     '[data-testid="group-notification-context-card-title"]',
     '[data-testid="group-notification-context-card-subtitle"]',
     '[data-testid="msg-notification-container"] [data-testid*="subtype"]',
+    '[data-testid="msg-notification-container"] [data-testid="pinned_message_system_message"]',
     '[role="button"][aria-label="Close"] | up:1 | find:> div:nth-child(2) | has:span',
     '[data-testid="media-caption"]',
     'span[data-testid="selectable-text"] | closest:div | has:[data-testid="link-preview-container"]',
     'div | has:> [data-testid="quoted-message"]',
+
+    //  Pinned Messages
+    '[data-testid="conversation-panel-wrapper"] [data-testid="conversation-subheader"] > div:first-child > div:first-child > div:first-child > div:last-child',
 
     //  Group Descriptions
     '[data-testid="conversation-subheader"] > div > div > div:nth-child(2)',

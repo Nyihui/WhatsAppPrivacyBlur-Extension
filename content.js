@@ -413,10 +413,6 @@ function startObserver() {
         shouldUpdate = true;
         break;
       }
-      if (m.type === 'attributes' && m.attributeName === 'class') {
-        shouldUpdate = true;
-        break;
-      }
     }
     if (shouldUpdate) {
       scheduleDomUpdates();
@@ -425,9 +421,7 @@ function startObserver() {
 
   observer.observe(document.body || document.documentElement, {
     childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['class']
+    subtree: true
   });
 }
 
