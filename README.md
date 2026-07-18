@@ -5,6 +5,7 @@ A privacy extension for WhatsApp Web. This extension adds customizable hover-to-
 ## Links
 
 Firefox Add-on: https://addons.mozilla.org/firefox/addon/whatsapp-privacy-blur/
+Edge Add-on: https://microsoftedge.microsoft.com/addons/detail/okkcnnhjjdnenjekcfanpbbheinblhoo
 
 ## Features
 
