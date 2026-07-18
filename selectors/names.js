@@ -12,6 +12,7 @@ window.WA_BLUR_RULES.push({
   targets: [
 
     // EXPERIMENTAL
+    '[role="gridcell"] [data-testid="cell-frame-label"]',
     '[role="gridcell"] [data-testid="cell-frame-title"]',
     '[data-testid="recent-search-item"] > :last-child',
 
@@ -45,14 +46,16 @@ window.WA_BLUR_RULES.push({
     '[data-testid="chat-info-drawer"] | has:[data-testid*="contact-info-subtitle"] | find:[data-testid="li-block"] > div:first-child > div:last-child',
     '[data-testid="chat-info-drawer"] | has:[data-testid*="contact-info-subtitle"] | find:[data-testid="li-report-spam"] > div:first-child > div:last-child',
     'span[data-testid*="group-info-drawer-subject-input-read-only"] | closest:div',
-    '[data-testid="group-info-drawer-body"] > [data-testid="group_info_created_by_wrapper"]',
+    'span[data-testid*="community-home-subject-input-read-only"] | closest:div',
+    // '[data-testid="group-info-drawer-body"] > [data-testid="group_info_created_by_wrapper"]',
+    '[data-testid="group_info_created_by_wrapper"]',
     //  Right Sidebar - Group Participants Info
     '[data-testid="group-info-participants-section"] [role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-secondary"] > div:nth-child(2)',
     //  Right Sidebar - Common Group
     '[data-testid="section-common-groups"] | up:1 | find:[data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"]',
     //  Right Sidebar - Links Gallery Messages
     '[data-testid="link-gallery-msg"] > div:first-child > div:first-child > span[dir="auto"]',
-    // //  Popup Members
+    //  Popup Members
     '[data-testid="contacts-modal"] [role="listitem"] [data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"] > div:nth-child(2)',
   ],
 });

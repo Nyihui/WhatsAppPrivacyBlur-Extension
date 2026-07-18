@@ -16,6 +16,7 @@ window.WA_BLUR_RULES.push({
     'div[data-testid*="selectable-text"] | up:1 | has:img',
     '[data-testid="group-notification-context-card-title"]',
     '[data-testid="group-notification-context-card-subtitle"]',
+    '[data-testid="msg-notification-container"] div | has:> [data-testid="fmx-card-trust-signals"]',
     '[data-testid="msg-notification-container"] [data-testid*="subtype"]',
     '[data-testid="msg-notification-container"] [data-testid="pinned_message_system_message"]',
     '[role="button"][aria-label="Close"] | up:1 | find:> div:nth-child(2) | has:span',
@@ -30,6 +31,7 @@ window.WA_BLUR_RULES.push({
     '[data-testid="conversation-subheader"] > div > div > div:nth-child(2)',
     'span[data-testid*="group-notification-context-card-description"] | closest:div',
     'span[data-testid*="group-info-drawer-description-title-input-read-only"] | closest:div',
+    'span[data-testid*="community-home-drawer-description-title-input-read-only"] | closest:div',
 
     //  Story Captions
     '[data-testid="status-player-uie"] span[dir="auto"]:not(button[data-testid="status-player-contact-name"] *):not([class*="html-span"] *)'

@@ -36,6 +36,7 @@ window.WA_BLUR_RULES.push(
 
       //  Conversation Panel - Header
       '[data-testid="conversation-header"] > div:first-child > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      '[data-testid="conversation-header"] [data-testid="subgroup-switcher-button"] div | has:> div > img',
 
       //  Conversation Panel - Messages
       '[data-testid="group-chat-profile-picture"]',
