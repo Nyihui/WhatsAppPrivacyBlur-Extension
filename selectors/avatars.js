@@ -12,9 +12,15 @@ window.WA_BLUR_RULES.push(
     blurMultiplier: 1,
     targets: [
       //  Main Chat List Sidebar
-      '[data-testid="navbar-item-me-tab-photo"] | closest:button',
-      '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child img',
-      '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child img',
+      // '[data-testid="navbar-item-me-tab-photo"] | closest:button',
+      'div | has:> button > [data-testid="navbar-item-me-tab-photo"]',
+      // '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child img',
+      '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child div | has:> img',
+      // '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child img',
+      '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child div | has:> img',
+      //  Update 02-08-2026 - v2.3000.1044305114 || Profile picture with story ring. Commented out because it cannot be unblurred when hovered.
+      // '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child image',
+      // '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child image',
       //  Commented because it's the same as the anonymous photo
       // '[data-testid="default-contact-refreshed"] | closest:div',
       // '[data-testid="default-group-refreshed"] | closest:div',
@@ -24,7 +30,12 @@ window.WA_BLUR_RULES.push(
 
       //  Me Tab Drawer Sidebar
       '[data-testid="me-tab-drawer"] [data-testid="menu-controller-focus-receiver"] img[src*="https://media"]',
-      '[data-testid="profile-drawer"] img[src*="https://media"]',
+      // '[data-testid="profile-drawer"] img[src*="https://media"]',
+      //  Update 02-08-2026 - v2.3000.1044305114
+      '[data-testid="profile-drawer"] [data-testid="profile-pic-picker"]',
+
+      //  Calls Tab Drawer
+      '[data-testid="calls-tab-drawer"] [data-testid="calls-drawer"] [id="pane-side"] [data-testid*="list-item-"] [data-testid*="chatlist-message-"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
 
       //  Status Sidebar
       '[data-testid="status-tab-drawer"] [data-testid="status-header-add-status"] img[src*="https://media"]',
@@ -63,6 +74,17 @@ window.WA_BLUR_RULES.push(
       '[class*="overlay"] [data-testid="cell-frame-container"] img',
       //  Update 18-06-2026 || x1akjpcp = background-color: rgba(var(--WDS-background-wash-plain-RGB),.96);
       '[class*="x1akjpcp"] [data-testid="cell-frame-container"] img',
+    ],
+    hoverParentTargets: [
+      //  Update 02-08-2026 - v2.3000.1044305114 || Profile picture that has story rings.
+      {
+        hoverParent: '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child div:has( > svg image)',
+        child: 'image',
+      },
+      {
+        hoverParent: '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child div:has( > svg image)',
+        child: 'image',
+      },
     ],
   },
   {
