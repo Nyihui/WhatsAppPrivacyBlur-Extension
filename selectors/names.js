@@ -18,12 +18,13 @@ window.WA_BLUR_RULES.push({
 
     //  Me Tab Drawer Sidebar
     '[data-testid="me-tab-drawer"] [data-testid="drawer-title-body"]',
-    // '[data-testid="pushname-section"] | up:1 | find:> div:nth-child(2) > div > div:first-child',
     '[data-testid="profile-drawer"] [data-testid*="pushname-input-read-only"] | up:1',
     '[data-testid="profile-drawer"] [data-testid="phone"] | up:1 | find:> div',
     //  Username
     '[data-testid="profile-drawer"] [data-testid="mentions-refreshed"] | up:1 | find:> div:nth-child(2)',
     '[data-testid="creating-username-info-drawer"] > div:nth-child(2) > div:nth-child(2) > div:first-child > div > div:nth-child(2)',
+    //  Update 18-06-2026 - v2.3000.1047882213 || For both Username and Phone number
+    '[data-testid="profile-drawer"] [data-testid="pushname-description"] ~ div [data-testid="container"] div | has:> span > svg | find:> div',
 
     //  Starred Messages
     '[data-testid="drawer-left"] span:first-child div | has:> div > [data-testid*="conv-msg-"] | find:> div:first-child > div:first-child',
@@ -47,7 +48,6 @@ window.WA_BLUR_RULES.push({
     '[data-testid="chat-info-drawer"] | has:[data-testid*="contact-info-subtitle"] | find:[data-testid="li-report-spam"] > div:first-child > div:last-child',
     'span[data-testid*="group-info-drawer-subject-input-read-only"] | closest:div',
     'span[data-testid*="community-home-subject-input-read-only"] | closest:div',
-    // '[data-testid="group-info-drawer-body"] > [data-testid="group_info_created_by_wrapper"]',
     '[data-testid="group_info_created_by_wrapper"]',
     //  Right Sidebar - Group Participants Info
     '[data-testid="group-info-participants-section"] [role="listitem"] [data-testid="cell-frame-container"] > div:nth-child(2) [data-testid="cell-frame-secondary"] > div:nth-child(2)',
