@@ -44,7 +44,7 @@ window.WA_BLUR_RULES.push(
       '[data-testid="conversation-header"] [data-testid="subgroup-switcher-button"] div | has:> div > img',
 
       //  Conversation Panel - Messages
-      '[data-testid="group-chat-profile-picture"]',
+      'div[data-testid="group-chat-profile-picture"] | not-has:div[data-testid*="initial"]',
       '[data-testid="group-notification-context-card-photo"]',
       '[data-testid="conversation-panel-messages"] [data-testid="vcard-msg"] img',
       'div | has:> div > div > div > [data-testid="ptt-status"] | find:> div:first-child',

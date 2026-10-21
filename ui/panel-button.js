@@ -55,7 +55,7 @@ window.WAPanel.getMediaAnchor = function () {
     }
   }
 
-  const bottomGroup = header.querySelector('div[style*="flex-grow: 0"]');
+  const bottomGroup = header.querySelector('div[data-testid="navbar-footer-section"]');
   if (bottomGroup && bottomGroup.firstElementChild) {
     const navContainer = bottomGroup.firstElementChild;
     const mediaWrapper = navContainer.firstElementChild;
