@@ -74,10 +74,6 @@ function buildCSS(settings) {
 
     // --- Opacity mode (Text Input) ---
     if (rule.property === 'opacity') {
-      const opacityTransition = !hasAnimation
-        ? 'transition: none !important;'
-        : `transition-property: opacity !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;`;
-
       const hoverOpacityTransition = !hasAnimation
         ? 'transition-property: opacity !important; transition-duration: 0s !important; transition-delay: 0.1s !important;'
         : `transition-property: opacity !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-delay: 0.1s !important;`;
@@ -85,7 +81,7 @@ function buildCSS(settings) {
       css += `
       ${blurSelectors} {
         opacity: var(--wa-input-opacity) !important;
-        ${opacityTransition}
+        transition: none !important;
       }
       ${hoverSelectors},
       ${overrideSelectors} {
@@ -102,10 +98,6 @@ function buildCSS(settings) {
     const blurValue = multiplier === 1
       ? 'var(--wa-blur-amount)'
       : `calc(var(--wa-blur-amount) * ${multiplier})`;
-
-    const filterTransition = !hasAnimation
-      ? 'transition: none !important;'
-      : `transition-property: filter, color, background-color !important; transition-duration: ${duration}s !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;`;
 
     const hoverFilterTransition = !hasAnimation
       ? 'transition: none !important;'
@@ -131,7 +123,7 @@ function buildCSS(settings) {
     css += `
     ${blurSelectors} {
       ${isRedacted ? redactedCSS : blurCSS}
-      ${filterTransition}
+      transition: none !important;
     }
     ${hoverSelectors},
     ${overrideSelectors} {
@@ -147,7 +139,7 @@ function buildCSS(settings) {
         css += `
         ${childBlur} {
           ${isRedacted ? redactedCSS : blurCSS}
-          ${filterTransition}
+          transition: none !important;
         }
         ${childHover} {
           ${isRedacted ? redactedHoverCSS : blurHoverCSS}
@@ -166,8 +158,13 @@ function buildCSS(settings) {
    Writes the generated CSS into a single <style> tag in <head>.
    Replaces contents on every settings update — no stale rules accumulate.
 -------------------------------------------------------------------------- */
+let lastInjectedCSS = null;
+let currentSettings = null;
+
 function injectCSS(css) {
   let el = document.getElementById('wa-privacy-blur-styles');
+  if (css === lastInjectedCSS && el) return;
+  lastInjectedCSS = css;
   if (!el) {
     el = document.createElement('style');
     el.id = 'wa-privacy-blur-styles';
@@ -185,10 +182,11 @@ function applySettings(settings) {
     settings.unblurLastNCount = 10;
     chrome.storage.local.set({ unblurLastNCount: 10 });
   }
+  const prevSettings = currentSettings;
   currentSettings = settings;
   const root = document.documentElement;
 
-  // 1. CSS custom properties
+  // 1. CSS custom properties (instant GPU updates)
   const blurPx = settings.blurAmount !== undefined ? settings.blurAmount : window.WAPanel.DEFAULT_SETTINGS.blurAmount;
   const opacityPct = settings.inputOpacity !== undefined ? settings.inputOpacity : window.WAPanel.DEFAULT_SETTINGS.inputOpacity;
   root.style.setProperty('--wa-blur-amount', `${blurPx}px`);
@@ -198,13 +196,27 @@ function applySettings(settings) {
   const isEnabled = settings.enabled !== undefined ? settings.enabled : window.WAPanel.DEFAULT_SETTINGS.enabled;
   root.classList.toggle('wa-privacy-enabled', isEnabled);
 
-  // 3. Generate & inject dynamic stylesheet
-  injectCSS(isEnabled ? buildCSS(settings) : '');
+  // 3. Fast-path: Only rebuild stylesheet if toggles, rules, or animation settings changed
+  const needsCSSRebuild = !prevSettings ||
+    prevSettings.enabled !== settings.enabled ||
+    prevSettings.privacyMode !== settings.privacyMode ||
+    prevSettings.animation !== settings.animation ||
+    prevSettings.animationDuration !== settings.animationDuration ||
+    window.WA_BLUR_RULES.some(r => prevSettings[r.key] !== settings[r.key]);
 
-  // 4. Manage DOM Observer for "Unblur Last N Messages"
-  manageUnblurObserver(settings);
+  if (needsCSSRebuild) {
+    injectCSS(isEnabled ? buildCSS(settings) : '');
+  }
 
-  // console.log('[Privacy Blur] Applied settings:', settings);
+  // 4. Fast-path: Only update DOM observer if unblur/enabled changed
+  const needsObserverUpdate = !prevSettings ||
+    prevSettings.enabled !== settings.enabled ||
+    prevSettings.unblurLastN !== settings.unblurLastN ||
+    prevSettings.unblurLastNCount !== settings.unblurLastNCount;
+
+  if (needsObserverUpdate) {
+    manageUnblurObserver(settings);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -212,7 +224,6 @@ function applySettings(settings) {
 // ---------------------------------------------------------------------------
 let currentUnblurN = 0;
 let domObserver = null;
-let currentSettings = window.WAPanel.DEFAULT_SETTINGS;
 
 function applyUnblurLastN() {
   if (currentUnblurN <= 0) {
@@ -395,10 +406,10 @@ function applyDomUpdates() {
 
 function scheduleDomUpdates() {
   if (updateTimeout) return; // Already scheduled
-  updateTimeout = setTimeout(() => {
+  updateTimeout = requestAnimationFrame(() => {
     applyDomUpdates();
     updateTimeout = null;
-  }, 50);
+  });
 }
 
 let observer = null;
@@ -441,7 +452,7 @@ function manageUnblurObserver(settings) {
       observer = null;
     }
     if (updateTimeout) {
-      clearTimeout(updateTimeout);
+      cancelAnimationFrame(updateTimeout);
       updateTimeout = null;
     }
     // Cleanup overrides if toggled off

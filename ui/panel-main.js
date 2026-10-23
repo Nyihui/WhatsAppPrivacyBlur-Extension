@@ -86,27 +86,45 @@ window.WAPanel.mount = function() {
   const animSlider = shadow.getElementById('panel-animation-duration-slider');
   const animValEl = shadow.getElementById('panel-animation-duration-val');
 
+  const debounce = (fn, delay = 120) => {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), delay);
+    };
+  };
+
+  const saveBlurAmount = debounce((val) => chrome.storage.local.set({ blurAmount: val }));
+  const saveInputOpacity = debounce((val) => chrome.storage.local.set({ inputOpacity: val }));
+  const saveUnblurLastN = debounce((val) => chrome.storage.local.set({ unblurLastNCount: val }));
+  const saveAnimDuration = debounce((val) => chrome.storage.local.set({ animationDuration: val }));
+
   blurSlider.addEventListener('input', function () {
-    blurValEl.textContent = `${this.value}px`;
-    chrome.storage.local.set({ blurAmount: parseInt(this.value, 10) });
+    const val = parseInt(this.value, 10);
+    blurValEl.textContent = `${val}px`;
+    document.documentElement.style.setProperty('--wa-blur-amount', `${val}px`);
+    saveBlurAmount(val);
   });
 
   opacitySlider.addEventListener('input', function () {
-    opacityValEl.textContent = `${this.value}%`;
-    chrome.storage.local.set({ inputOpacity: parseInt(this.value, 10) });
+    const val = parseInt(this.value, 10);
+    opacityValEl.textContent = `${val}%`;
+    document.documentElement.style.setProperty('--wa-input-opacity', (val / 100).toFixed(2));
+    saveInputOpacity(val);
   });
 
   unblurLastNSlider.addEventListener('input', function () {
     let val = parseInt(this.value, 10);
     if (val > 10) val = 10;
     unblurLastNValEl.textContent = val;
-    chrome.storage.local.set({ unblurLastNCount: val });
+    saveUnblurLastN(val);
   });
 
   if (animSlider && animValEl) {
     animSlider.addEventListener('input', function () {
-      animValEl.textContent = `${this.value}s`;
-      chrome.storage.local.set({ animationDuration: parseFloat(this.value) });
+      const val = parseFloat(this.value);
+      animValEl.textContent = `${val}s`;
+      saveAnimDuration(val);
     });
   }
 
@@ -132,8 +150,7 @@ window.WAPanel.mount = function() {
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message.action === 'togglePanel') {
-      const placeholder = document.getElementById('wa-privacy-clb-placeholder');
-      const rect = placeholder ? placeholder.getBoundingClientRect() : (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null);
+      const rect = window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null;
       window.WAPanel.togglePanel(panel, rect, shadow);
       return;
     }
@@ -150,7 +167,6 @@ window.WAPanel.mount = function() {
   });
 
   window.addEventListener('resize', () => {
-    if (window.WAPanel.positionCLBBtn) window.WAPanel.positionCLBBtn();
     if (window.WAPanel.isOpen && window.WAPanel.currentAnchorRect) window.WAPanel.positionPanel(panel);
   });
 
@@ -159,17 +175,12 @@ window.WAPanel.mount = function() {
     .observe(document.body, { attributeFilter: ['class'] });
 
   // Re-inject sidebar button when WhatsApp re-renders the sidebar,
-  // instead of polling every 2 seconds with setInterval.
+  // instead of polling with setInterval.
   const sidebarObserver = new MutationObserver(() => {
-    if (!document.getElementById('wa-privacy-clb-placeholder')) {
+    if (!document.getElementById('wa-privacy-btn-wrapper')) {
       window.WAPanel.injectChatlistBtn(panel, shadow);
-    } else {
-      if (window.WAPanel.positionCLBBtn) {
-        window.WAPanel.positionCLBBtn();
-        if (window.WAPanel.isOpen) {
-          window.WAPanel.positionPanel(panel);
-        }
-      }
+    } else if (window.WAPanel.isOpen) {
+      window.WAPanel.positionPanel(panel);
     }
   });
 
@@ -192,16 +203,6 @@ window.WAPanel.mount = function() {
   };
   startSidebarObserver();
   window.WAPanel.injectChatlistBtn(panel, shadow);
-
-  // Set up a lightweight, periodic interval as a failsafe fallback
-  setInterval(() => {
-    if (window.WAPanel.positionCLBBtn) {
-      window.WAPanel.positionCLBBtn();
-      if (window.WAPanel.isOpen) {
-        window.WAPanel.positionPanel(panel);
-      }
-    }
-  }, 200);
 };
 
 if (document.body) {

@@ -23,18 +23,24 @@ window.WAPanel.applySettingsToPanel = function (shadow, settings) {
   shadow.getElementById('panel-enabled').checked = enabled;
   dashboard.classList.toggle('shield-off', !enabled);
 
-  const blurAmount = settings.blurAmount ?? window.WAPanel.DEFAULT_SETTINGS.blurAmount;
-  shadow.getElementById('panel-blur-intensity').value = blurAmount;
-  shadow.getElementById('panel-blur-val').textContent = `${blurAmount}px`;
+  const activeEl = shadow.activeElement;
+
+  if (activeEl?.id !== 'panel-blur-intensity') {
+    const blurAmount = settings.blurAmount ?? window.WAPanel.DEFAULT_SETTINGS.blurAmount;
+    shadow.getElementById('panel-blur-intensity').value = blurAmount;
+    shadow.getElementById('panel-blur-val').textContent = `${blurAmount}px`;
+  }
 
   for (const { id, key } of window.WAPanel.TOGGLE_MAP) {
     const el = shadow.getElementById(id);
     if (el) el.checked = settings[key] ?? window.WAPanel.DEFAULT_SETTINGS[key];
   }
 
-  const inputOpacity = settings.inputOpacity ?? window.WAPanel.DEFAULT_SETTINGS.inputOpacity;
-  shadow.getElementById('panel-input-opacity-slider').value = inputOpacity;
-  shadow.getElementById('panel-input-opacity-val').textContent = `${inputOpacity}%`;
+  if (activeEl?.id !== 'panel-input-opacity-slider') {
+    const inputOpacity = settings.inputOpacity ?? window.WAPanel.DEFAULT_SETTINGS.inputOpacity;
+    shadow.getElementById('panel-input-opacity-slider').value = inputOpacity;
+    shadow.getElementById('panel-input-opacity-val').textContent = `${inputOpacity}%`;
+  }
   
   const inputEnabled = settings.blurInput ?? window.WAPanel.DEFAULT_SETTINGS.blurInput;
   const inputPanel = shadow.getElementById('panel-input-opacity-panel');
@@ -44,10 +50,12 @@ window.WAPanel.applySettingsToPanel = function (shadow, settings) {
     inputText.style.display = inputEnabled ? 'none' : 'flex';
   }
 
-  const unblurLastNCount = settings.unblurLastNCount ?? window.WAPanel.DEFAULT_SETTINGS.unblurLastNCount;
-  const clampedCount = Math.min(10, unblurLastNCount);
-  shadow.getElementById('panel-unblur-last-n-slider').value = clampedCount;
-  shadow.getElementById('panel-unblur-last-n-val').textContent = clampedCount;
+  if (activeEl?.id !== 'panel-unblur-last-n-slider') {
+    const unblurLastNCount = settings.unblurLastNCount ?? window.WAPanel.DEFAULT_SETTINGS.unblurLastNCount;
+    const clampedCount = Math.min(10, unblurLastNCount);
+    shadow.getElementById('panel-unblur-last-n-slider').value = clampedCount;
+    shadow.getElementById('panel-unblur-last-n-val').textContent = clampedCount;
+  }
   
   const unblurLastNEnabled = settings.unblurLastN ?? window.WAPanel.DEFAULT_SETTINGS.unblurLastN;
   const unblurPanel = shadow.getElementById('panel-unblur-last-n-panel');
@@ -57,9 +65,11 @@ window.WAPanel.applySettingsToPanel = function (shadow, settings) {
     unblurText.style.display = unblurLastNEnabled ? 'none' : 'flex';
   }
 
-  const animationDuration = settings.animationDuration ?? window.WAPanel.DEFAULT_SETTINGS.animationDuration;
-  shadow.getElementById('panel-animation-duration-slider').value = animationDuration;
-  shadow.getElementById('panel-animation-duration-val').textContent = `${animationDuration}s`;
+  if (activeEl?.id !== 'panel-animation-duration-slider') {
+    const animationDuration = settings.animationDuration ?? window.WAPanel.DEFAULT_SETTINGS.animationDuration;
+    shadow.getElementById('panel-animation-duration-slider').value = animationDuration;
+    shadow.getElementById('panel-animation-duration-val').textContent = `${animationDuration}s`;
+  }
   
   const animationEnabled = settings.animation ?? window.WAPanel.DEFAULT_SETTINGS.animation;
   const animationPanel = shadow.getElementById('panel-animation-duration-panel');

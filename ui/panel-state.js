@@ -4,10 +4,7 @@ window.WAPanel.PANEL_GAP = 8;
 window.WAPanel.EDGE_MARGIN = 12;
 
 window.WAPanel.positionPanel = function (panel, anchorRect) {
-  const placeholder = document.getElementById('wa-privacy-clb-placeholder');
-  const rect = (placeholder && placeholder.getBoundingClientRect().width > 0)
-    ? placeholder.getBoundingClientRect()
-    : (anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null));
+  const rect = anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null);
   if (!rect) return;
 
   const vw = window.innerWidth;
@@ -42,20 +39,13 @@ window.WAPanel.positionPanel = function (panel, anchorRect) {
   //    (minus the EDGE_MARGIN) or 85% of the viewport height, whichever is smaller, to prevent overflow.
   const maxAvailHeight = anchorBottom - window.WAPanel.EDGE_MARGIN;
   panel.style.maxHeight = `${Math.min(maxAvailHeight, vh * 0.85)}px`;
-
-  // 4. Transform origin: Set the origin to the bottom corner closest to the button
-  //    (bottom-right for RTL, bottom-left for LTR) for a clean zoom animation.
-  panel.style.transformOrigin = isRTL ? 'bottom right' : 'bottom left';
 };
 
 window.WAPanel.isOpen = false;
 window.WAPanel.currentAnchorRect = null;
 
 window.WAPanel.openPanel = function (panel, anchorRect, shadow) {
-  const placeholder = document.getElementById('wa-privacy-clb-placeholder');
-  const rect = (placeholder && placeholder.getBoundingClientRect().width > 0)
-    ? placeholder.getBoundingClientRect()
-    : (anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null));
+  const rect = anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null);
   window.WAPanel.currentAnchorRect = rect || window.WAPanel.currentAnchorRect;
   if (!window.WAPanel.currentAnchorRect) return;
   window.WAPanel.isOpen = true;
