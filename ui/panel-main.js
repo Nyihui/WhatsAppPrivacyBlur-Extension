@@ -21,6 +21,7 @@ window.WAPanel.mount = function() {
 
   const panel = document.createElement('div');
   panel.id = 'wa-panel';
+  window.WAPanel.panel = panel;
   const parser = new DOMParser();
   const doc = parser.parseFromString(window.WA_PANEL_HTML, 'text/html');
   while (doc.body.firstChild) {
@@ -65,14 +66,24 @@ window.WAPanel.mount = function() {
     if (!el) continue;
     el.addEventListener('change', function () {
       chrome.storage.local.set({ [key]: this.checked });
-      const row = shadow.getElementById(`row-${id}`);
-      if (row) {
-        const panel = row.querySelector('.inline-slider-container');
-        const text = row.querySelector('.row-text');
-        if (panel && text) {
-          panel.style.display = this.checked ? 'flex' : 'none';
-          text.style.display = this.checked ? 'none' : 'flex';
-        }
+      if (key === 'minimizerEnabled') {
+        const cardMinimizer = shadow.getElementById('card-master-minimizer');
+        if (cardMinimizer) cardMinimizer.classList.toggle('minimizer-off', !this.checked);
+      } else if (key === 'unblurLastN') {
+        const row = shadow.getElementById('drawerRow-unblur');
+        const slider = shadow.getElementById('panel-unblur-last-n-slider');
+        if (row) row.classList.toggle('disabled', !this.checked);
+        if (slider) slider.disabled = !this.checked;
+      } else if (key === 'blurInput') {
+        const row = shadow.getElementById('drawerRow-input');
+        const slider = shadow.getElementById('panel-input-opacity-slider');
+        if (row) row.classList.toggle('disabled', !this.checked);
+        if (slider) slider.disabled = !this.checked;
+      } else if (key === 'animation') {
+        const row = shadow.getElementById('drawerRow-animation');
+        const slider = shadow.getElementById('panel-animation-duration-slider');
+        if (row) row.classList.toggle('disabled', !this.checked);
+        if (slider) slider.disabled = !this.checked;
       }
     });
   }
@@ -116,7 +127,7 @@ window.WAPanel.mount = function() {
   unblurLastNSlider.addEventListener('input', function () {
     let val = parseInt(this.value, 10);
     if (val > 10) val = 10;
-    unblurLastNValEl.textContent = val;
+    unblurLastNValEl.textContent = `${val} msgs`;
     saveUnblurLastN(val);
   });
 

@@ -11,6 +11,7 @@ const includePaths = [
     'icons',
     'selectors',
     'ui',
+    'minimizer',
     'content.js',
     'manifest.json',
     'LICENSE',

@@ -21,6 +21,7 @@ window.WAPanel.DEFAULT_SETTINGS = {
   unblurLastN: false,
   unblurLastNCount: 3,
   privacyMode: 'blur',
+  minimizerEnabled: true,
 };
 
 /* --------------------------------------------------------------------------
@@ -291,7 +292,7 @@ function evaluatePipeline(targetStr) {
 
   try {
     const elements = document.querySelectorAll(triggerSelector);
-    
+
     // OPTIMIZATION: If all commands were folded into the CSS string natively,
     // we can completely skip the JavaScript element-by-element iteration.
     if (commands.length === 0) {

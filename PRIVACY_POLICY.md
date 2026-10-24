@@ -1,6 +1,6 @@
 # Privacy Policy for WhatsApp Privacy Blur
 
-**Last Updated:** June 24, 2026
+**Last Updated:** October 24, 2026
 
 ## 1. Introduction
 WhatsApp Privacy Blur ("the Extension") is committed to protecting your privacy. This policy explains our data collection and handling practices. The short version: **we do not collect, store, or transmit any of your personal data.**
@@ -12,8 +12,9 @@ The Extension operates entirely locally on your device. Its core functionality i
 - **Local Execution:** All content scripts and visual modifications are executed directly within your browser. Your data never leaves your machine.
 
 ## 3. Permissions Justification
-The Extension requests the following permission to function:
-- **`storage`**: Used exclusively to save your local settings (e.g., your blur intensity preferences and toggle states). This data is stored locally in your browser and syncs only via your browser's native sync features (if you have them enabled). We do not have access to this data.
+The Extension requests the following permissions to function:
+- **`https://web.whatsapp.com/*`**: Required solely to inject visual styling (blur filters and sidebar collapse) onto the WhatsApp Web interface.
+- **`storage`**: Used exclusively via `chrome.storage.local` to save your toggle preferences and slider values locally on your device. We do not have access to this data.
 
 ## 4. Third-Party Access
 Because we do not collect any data, we have no data to share, sell, or rent to third parties.

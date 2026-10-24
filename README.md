@@ -1,29 +1,36 @@
 # WhatsApp Privacy Blur
 
-A privacy extension for WhatsApp Web. This extension adds customizable hover-to-reveal blur layers over sensitive elements to protect your chats from onlookers.
+A privacy extension for WhatsApp Web. Adds customizable hover-to-reveal blur layers over sensitive elements to protect your screen from onlookers.
 
 ## Links
 
-Mozilla Firefox add-on: https://addons.mozilla.org/firefox/addon/whatsapp-privacy-blur  
-Microsoft Edge add-on: https://microsoftedge.microsoft.com/addons/detail/okkcnnhjjdnenjekcfanpbbheinblhoo
+- Mozilla Firefox add-on: https://addons.mozilla.org/firefox/addon/whatsapp-privacy-blur  
+- Microsoft Edge add-on: https://microsoftedge.microsoft.com/addons/detail/okkcnnhjjdnenjekcfanpbbheinblhoo
 
 ## Features
 
-- Master Shield: Quickly toggle the entire privacy filter on or off.
-- Blur Intensity: Adjust the blur level using an intensity slider.
-- Custom Blur Targets: Choose exactly what to hide by toggling individual filters:
-  - Profile pictures and avatars
-  - Contact names and group names
+- **Sidebar Minimizer:** Collapse the left chat list with smooth transitions using the navbar button or `Alt + .` shortcut.
+- **Master Shield:** Quickly toggle all privacy filters on or off.
+- **Privacy Modes:** Choose between frosted-glass **Blur** (with hover-to-reveal) and solid black **Redacted** blocks.
+- **Quick Settings Panel:** Fast toggles and sliders for blur intensity, text opacity, and hover animations.
+- **Unblur Latest Messages:** Automatically keep the last 1 to 10 messages visible in active chats.
+- **Customizable Blur Targets:** Turn blur on or off for specific elements:
+  - Profile pictures and status rings
+  - Contact names and group titles
   - Message previews in the chat list
-  - Text messages in active chats
-  - Media previews
-  - Media gallery items
+  - Message text in conversation bubbles
   - Stickers
-  - Chat text input box
-- Hover to Reveal: Hover your mouse pointer over any blurred item to temporarily reveal it.
-- Animation Controls: Toggle and adjust the duration of transition animations when hovering.
-- Redacted Mode: Choose between standard blur style or solid black redacted blocks.
-- Unblur Last Messages: Keep the last few messages in the active chat unblurred to maintain conversation flow.
-- Input Opacity Slider: Adjust the opacity of the text input area.
-- Keyboard Shortcut: Press `Alt + /` to toggle the shield filter instantly.
-- Theme Syncing: Automatically adapts to light and dark modes in WhatsApp Web.
+  - Media previews (images, videos, document links)
+  - Fullscreen media gallery
+  - Text input field (with opacity slider)
+  - Hover animations
+- **Theme Syncing:** Automatically matches WhatsApp Web's light and dark modes.
+
+## Shortcuts
+
+- `Alt + /`: Toggle Master Privacy Shield on or off.
+- `Alt + .`: Toggle Sidebar Minimizer (collapse / expand).
+
+## Privacy
+
+Runs 100% locally in your browser. Does not read, collect, or transmit any chat data or analytics.

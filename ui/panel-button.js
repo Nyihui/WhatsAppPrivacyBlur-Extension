@@ -68,7 +68,7 @@ window.WAPanel.getCLBColor = function () {
   return document.body.classList.contains('dark') ? '#aebac1' : '#54656f';
 };
 
-window.WAPanel.positionCLBBtn = function () {};
+window.WAPanel.positionCLBBtn = function () { };
 
 window.WAPanel.injectChatlistBtn = function (panel, shadow) {
   if (document.getElementById('wa-privacy-btn-wrapper')) return;
@@ -96,66 +96,107 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
     iconSpan.innerHTML = '';
   }
 
-  // 3. Tooltip setup
-  let tooltip = document.getElementById('wa-privacy-tooltip');
-  if (!tooltip) {
-    tooltip = document.createElement('div');
-    tooltip.id = 'wa-privacy-tooltip';
-    tooltip.setAttribute('role', 'tooltip');
-    tooltip.style.cssText = [
-      'position:fixed',
-      'display:flex',
-      'align-items:center',
-      'min-height:24px',
-      'max-width:200px',
-      'padding:3px 8px',
-      'border-radius:4px',
-      'font-size:12px',
-      'line-height:14px',
-      'font-weight:400',
-      'letter-spacing:-0.0137em',
-      'white-space:nowrap',
-      'pointer-events:none',
-      'z-index:2147483647',
-      'opacity:0',
-      'transform:translateY(-50%)',
-      'transition:opacity 0.1s cubic-bezier(0, 0, 1, 1)',
-      'font-family:Roboto Variable, Roboto, Helvetica Neue, Helvetica, sans-serif'
-    ].join(';');
+  // 3. Tooltip helpers (reusable across all buttons and elements)
+  window.WAPanel.getTooltip = function () {
+    let tooltip = document.getElementById('wa-privacy-tooltip');
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.id = 'wa-privacy-tooltip';
+      tooltip.setAttribute('role', 'tooltip');
+      tooltip.style.cssText = [
+        'position:fixed',
+        'display:flex',
+        'box-sizing:border-box',
+        'min-height:24px',
+        'max-width:200px',
+        'padding:0',
+        'border:0',
+        'border-radius:4px',
+        'box-shadow:0 0 20px #0003, 0 1px #0000000a',
+        'pointer-events:none',
+        'z-index:2147483647',
+        'opacity:0',
+        'transform:translateY(-50%)',
+        'transition:opacity 0.1s cubic-bezier(0, 0, 1, 1)',
+        'font-family:Roboto Variable, Roboto, Helvetica Neue, Helvetica, sans-serif',
+        'font-feature-settings:"kern"',
+        '-moz-font-feature-settings:"kern"',
+        'text-rendering:optimizeLegibility'
+      ].join(';');
 
-    const textSpan = document.createElement('span');
-    textSpan.textContent = 'WhatsApp Privacy Blur';
-    tooltip.appendChild(textSpan);
-    document.body.appendChild(tooltip);
-  }
+      const innerWrapper = document.createElement('div');
+      innerWrapper.style.cssText = [
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'padding:3px 8px',
+        'box-sizing:border-box',
+        'min-height:24px',
+        'width:100%'
+      ].join(';');
 
-  clbBtn.addEventListener('mouseenter', () => {
-    const isDark = document.body.classList.contains('dark');
-    const isRTL = window.WAPanel.checkRTL();
+      const textSpan = document.createElement('span');
+      textSpan.id = 'wa-privacy-tooltip-text';
+      textSpan.style.cssText = [
+        'font-size:12px',
+        'line-height:14px',
+        'font-weight:400',
+        'letter-spacing:-0.0137em',
+        'white-space:nowrap',
+        'color:inherit'
+      ].join(';');
 
-    const rect = clbBtn.getBoundingClientRect();
+      innerWrapper.appendChild(textSpan);
+      tooltip.appendChild(innerWrapper);
+      document.body.appendChild(tooltip);
+    }
+    return tooltip;
+  };
+
+  window.WAPanel.showTooltip = function (element, text) {
+    if (!element) return;
+    const tooltip = window.WAPanel.getTooltip();
+    const textSpan = tooltip.querySelector('#wa-privacy-tooltip-text') || tooltip;
+    textSpan.textContent = text;
+
+    const isDark = document.body.classList.contains('dark') || document.documentElement.classList.contains('dark');
+    const isRTL = window.WAPanel.checkRTL ? window.WAPanel.checkRTL() : false;
+
+    const rect = element.getBoundingClientRect();
     tooltip.style.top = `${rect.top + rect.height / 2}px`;
     if (isRTL) {
       tooltip.style.left = 'auto';
-      tooltip.style.right = `${window.innerWidth - rect.left + 5}px`;
+      tooltip.style.right = `${window.innerWidth - rect.left + 4}px`;
     } else {
       tooltip.style.right = 'auto';
-      tooltip.style.left = `${rect.right + 5}px`;
+      tooltip.style.left = `${rect.right + 4}px`;
     }
 
     if (isDark) {
-      tooltip.style.background = 'var(--WDS-surface-inverse, #EEEEEE)';
+      tooltip.style.backgroundColor = 'var(--WDS-surface-inverse, #EEEEEE)';
       tooltip.style.color = 'var(--WDS-content-inverse, #0A0A0A)';
     } else {
-      tooltip.style.background = 'var(--WDS-surface-inverse, #242626)';
+      tooltip.style.backgroundColor = 'var(--WDS-surface-inverse, #242626)';
       tooltip.style.color = 'var(--WDS-content-inverse, #FAFAFA)';
     }
-    tooltip.style.boxShadow = '0 0 20px #0003, 0 1px #0000000a';
     tooltip.style.opacity = '1';
+  };
+
+  window.WAPanel.hideTooltip = function () {
+    const tooltip = document.getElementById('wa-privacy-tooltip');
+    if (tooltip) tooltip.style.opacity = '0';
+  };
+
+  // Pre-initialize tooltip
+  window.WAPanel.getTooltip();
+
+  clbBtn.addEventListener('mouseenter', () => {
+    if (window.WAPanel.isOpen) return;
+    window.WAPanel.showTooltip(clbBtn, 'WhatsApp Privacy Blur');
   });
 
   clbBtn.addEventListener('mouseleave', () => {
-    tooltip.style.opacity = '0';
+    window.WAPanel.hideTooltip();
   });
 
   clbBtn.addEventListener('mousedown', (e) => {
@@ -165,16 +206,91 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
   clbBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     e.preventDefault();
+    window.WAPanel.hideTooltip();
     const rect = clbBtn.getBoundingClientRect();
     window.WAPanel.togglePanel(panel, rect, shadow);
   });
 
-  // 4. Inject cloned button wrapper into WhatsApp navbar right before Media
+  // 4. Inject Shield button into WhatsApp navbar (before Media)
   navContainer.insertBefore(customWrapper, mediaWrapper);
   window.WAPanel.clbBtn = clbBtn;
 
-  // 5. Update icon state
+  // 5. Update Shield icon states
   const isActive = window.WAPanel.isEnabled !== undefined ? window.WAPanel.isEnabled : true;
   window.WAPanel.updateCLBIcon(clbBtn, isActive);
   window.WAPanel.updateCLBGlow();
+
+  // 6. Inject Minimizer button if enabled
+  const isMinimizerEnabled = window.WAMinimizer ? window.WAMinimizer.isEnabled : true;
+  if (isMinimizerEnabled) {
+    window.WAPanel.injectMinimizerBtn();
+  }
+};
+
+window.WAPanel.removeMinimizerBtn = function () {
+  const wrapper = document.getElementById('wa-sidebar-toggle-btn-wrapper');
+  if (wrapper) wrapper.remove();
+  window.WAPanel.minBtn = null;
+  if (window.WAPanel.hideTooltip) window.WAPanel.hideTooltip();
+};
+
+window.WAPanel.injectMinimizerBtn = function () {
+  if (document.getElementById('wa-sidebar-toggle-btn-wrapper')) return;
+  const customWrapper = document.getElementById('wa-privacy-btn-wrapper');
+  if (!customWrapper || !customWrapper.parentElement) return;
+
+  const anchor = window.WAPanel.getMediaAnchor();
+  if (!anchor) return;
+  const { mediaWrapper } = anchor;
+
+  const minimizerWrapper = mediaWrapper.cloneNode(true);
+  minimizerWrapper.id = 'wa-sidebar-toggle-btn-wrapper';
+
+  const minBtn = minimizerWrapper.querySelector('button');
+  if (!minBtn) return;
+
+  minBtn.id = 'wa-sidebar-toggle-btn';
+  minBtn.type = 'button';
+  minBtn.removeAttribute('data-navbar-item-index');
+  minBtn.setAttribute('data-navbar-item-selected', 'false');
+
+  const minIconSpan = minBtn.querySelector('span[aria-hidden="true"]') || minBtn.querySelector('svg')?.parentElement;
+  if (minIconSpan) {
+    minIconSpan.innerHTML = '';
+  }
+
+  minBtn.addEventListener('mouseenter', () => {
+    const isMin = window.WAMinimizer ? window.WAMinimizer.isMinimized : false;
+    window.WAPanel.showTooltip(minBtn, isMin ? 'Expand Sidebar' : 'Minimize Sidebar');
+  });
+
+  minBtn.addEventListener('mouseleave', () => {
+    window.WAPanel.hideTooltip();
+  });
+
+  minBtn.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    if (window.WAPanel.isOpen) {
+      window.WAPanel.closePanel();
+    }
+  });
+
+  minBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    window.WAPanel.hideTooltip();
+    if (window.WAPanel.isOpen) {
+      window.WAPanel.closePanel();
+    }
+    if (window.WAMinimizer && window.WAMinimizer.toggle) {
+      window.WAMinimizer.toggle();
+    }
+  });
+
+  customWrapper.parentElement.insertBefore(minimizerWrapper, customWrapper);
+  window.WAPanel.minBtn = minBtn;
+
+  if (window.WAMinimizer && window.WAMinimizer.updateButtonIcon) {
+    window.WAMinimizer.updateButtonIcon(minBtn, window.WAMinimizer.isMinimized);
+  }
 };

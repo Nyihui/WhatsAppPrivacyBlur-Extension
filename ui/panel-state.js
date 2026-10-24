@@ -45,6 +45,7 @@ window.WAPanel.isOpen = false;
 window.WAPanel.currentAnchorRect = null;
 
 window.WAPanel.openPanel = function (panel, anchorRect, shadow) {
+  if (window.WAPanel.hideTooltip) window.WAPanel.hideTooltip();
   const rect = anchorRect || (window.WAPanel.clbBtn ? window.WAPanel.clbBtn.getBoundingClientRect() : null);
   window.WAPanel.currentAnchorRect = rect || window.WAPanel.currentAnchorRect;
   if (!window.WAPanel.currentAnchorRect) return;
@@ -57,7 +58,8 @@ window.WAPanel.openPanel = function (panel, anchorRect, shadow) {
 
 window.WAPanel.closePanel = function (panel) {
   window.WAPanel.isOpen = false;
-  panel.classList.remove('open');
+  const target = panel || window.WAPanel.panel;
+  if (target) target.classList.remove('open');
   if (window.WAPanel.updateCLBGlow) window.WAPanel.updateCLBGlow();
 };
 

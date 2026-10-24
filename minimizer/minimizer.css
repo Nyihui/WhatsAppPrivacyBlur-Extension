@@ -1,0 +1,30 @@
+/* ==========================================================================
+   WhatsApp Privacy Blur - Sidebar Minimizer Styles
+   ========================================================================== */
+
+/* --- Transitions for Smooth Minimize / Expand --- */
+.wa-js-target-minimizer {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    flex-basis 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
+}
+
+/* --- Hide Left Sidebar (0px) when Minimized --- */
+.wa-chat-minimized .wa-js-target-minimizer {
+  border-inline-start-width: 0 !important;
+  border-inline-end-width: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  flex: 0 0 0% !important;
+  flex-basis: 0% !important;
+  overflow: hidden !important;
+}
+
+/* --- Native Vector Icon for Sidebar Toggle Button --- */
+#wa-sidebar-toggle-btn svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
