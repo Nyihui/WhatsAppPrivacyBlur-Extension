@@ -84,6 +84,8 @@ window.WAPanel.mount = function() {
         const slider = shadow.getElementById('panel-animation-duration-slider');
         if (row) row.classList.toggle('disabled', !this.checked);
         if (slider) slider.disabled = !this.checked;
+        const currentDur = slider ? parseFloat(slider.value) : 0.25;
+        document.documentElement.style.setProperty('--wa-transition-duration', this.checked ? `${currentDur}s` : '0s');
       }
     });
   }
@@ -135,6 +137,10 @@ window.WAPanel.mount = function() {
     animSlider.addEventListener('input', function () {
       const val = parseFloat(this.value);
       animValEl.textContent = `${val}s`;
+      const animToggle = shadow.getElementById('panel-toggle-animation');
+      if (!animToggle || animToggle.checked) {
+        document.documentElement.style.setProperty('--wa-transition-duration', `${val}s`);
+      }
       saveAnimDuration(val);
     });
   }

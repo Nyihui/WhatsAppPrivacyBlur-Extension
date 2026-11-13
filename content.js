@@ -190,8 +190,12 @@ function applySettings(settings) {
   // 1. CSS custom properties (instant GPU updates)
   const blurPx = settings.blurAmount !== undefined ? settings.blurAmount : window.WAPanel.DEFAULT_SETTINGS.blurAmount;
   const opacityPct = settings.inputOpacity !== undefined ? settings.inputOpacity : window.WAPanel.DEFAULT_SETTINGS.inputOpacity;
+  const hasAnimation = settings.animation !== undefined ? settings.animation : window.WAPanel.DEFAULT_SETTINGS.animation;
+  const duration = settings.animationDuration !== undefined ? settings.animationDuration : window.WAPanel.DEFAULT_SETTINGS.animationDuration;
+
   root.style.setProperty('--wa-blur-amount', `${blurPx}px`);
   root.style.setProperty('--wa-input-opacity', (opacityPct / 100).toFixed(2));
+  root.style.setProperty('--wa-transition-duration', hasAnimation ? `${duration}s` : '0s');
 
   // 2. Master privacy class
   const isEnabled = settings.enabled !== undefined ? settings.enabled : window.WAPanel.DEFAULT_SETTINGS.enabled;
@@ -225,9 +229,11 @@ function applySettings(settings) {
 // ---------------------------------------------------------------------------
 let currentUnblurN = 0;
 let domObserver = null;
+let hasLastNOverrides = false;
 
 function applyUnblurLastN() {
   if (currentUnblurN <= 0) {
+    if (!hasLastNOverrides) return;
     const overrides = document.querySelectorAll(`
       [data-testid="msg-container"].wa-unblur-override,
       [data-id*="grouped-sticker"].wa-unblur-override
@@ -235,6 +241,7 @@ function applyUnblurLastN() {
     overrides.forEach(el => {
       el.classList.remove('wa-unblur-override');
     });
+    hasLastNOverrides = false;
     return;
   }
   const messages = document.querySelectorAll(`
@@ -256,12 +263,41 @@ function applyUnblurLastN() {
   for (let i = start; i < messages.length; i++) {
     if (!messages[i].classList.contains('wa-unblur-override')) {
       messages[i].classList.add('wa-unblur-override');
+      hasLastNOverrides = true;
     }
   }
 }
 
+const CONTAINER_GATES = new Set([
+  'profile-drawer',
+  'chat-info-drawer',
+  'contacts-modal',
+  'media-viewer-modal',
+  'media-hub-modal',
+  'me-tab-drawer',
+  'calls-tab-drawer',
+  'status-tab-drawer',
+  'status-player-uie',
+  'creating-username-info-drawer'
+]);
+
 function evaluatePipeline(targetStr) {
-  if (typeof targetStr !== 'string' || !targetStr.includes('|')) return [];
+  if (typeof targetStr !== 'string') return [];
+
+  // Fast-path: If selector is scoped to an unmounted drawer/modal, skip full DOM query
+  const containerMatch = targetStr.match(/^\[data-testid="([^"]+)"\]/);
+  if (containerMatch && CONTAINER_GATES.has(containerMatch[1])) {
+    if (!document.querySelector(`[data-testid="${containerMatch[1]}"]`)) {
+      return [];
+    }
+  }
+  if (!targetStr.includes('|')) {
+    try {
+      return Array.from(document.querySelectorAll(targetStr));
+    } catch (e) {
+      return [];
+    }
+  }
   const parts = targetStr.split('|').map(s => s.trim());
   let triggerSelector = parts[0];
   const originalCommands = parts.slice(1);
@@ -370,6 +406,11 @@ function applyJsTargets() {
 
     if (rule.hoverHasTargets) {
       rule.hoverHasTargets.forEach((hht, index) => {
+        // Fast-path: If trigger and blur targets are already wired and still in the DOM, skip re-query
+        if (hht._wired && hht._trigger?.isConnected && hht._blurTargets?.length > 0 && hht._blurTargets.every(t => t.isConnected)) {
+          return;
+        }
+
         const blurTargets = evaluatePipeline(hht.blurTarget);
         const triggerTargets = evaluatePipeline(hht.hoverTrigger);
 
@@ -381,9 +422,10 @@ function applyJsTargets() {
           }
         });
 
+        const marker = `data-wa-hht-${ruleIndex}-${index}`;
         triggerTargets.forEach(trigger => {
-          if (trigger.dataset.hhtProcessed) return;
-          trigger.dataset.hhtProcessed = "true";
+          if (trigger.hasAttribute(marker)) return;
+          trigger.setAttribute(marker, "true");
 
           trigger.addEventListener('mouseenter', () => {
             const currentBlurTargets = evaluatePipeline(hht.blurTarget);
@@ -395,6 +437,12 @@ function applyJsTargets() {
             currentBlurTargets.forEach(t => t.classList.remove('wa-unblur-override'));
           });
         });
+
+        if (triggerTargets.length > 0 && blurTargets.length > 0) {
+          hht._trigger = triggerTargets[0];
+          hht._blurTargets = blurTargets;
+          hht._wired = true;
+        }
       });
     }
   });

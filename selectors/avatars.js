@@ -17,9 +17,11 @@ window.WA_BLUR_RULES.push(
       '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child div | has:> img',
       //  Update 18-06-2026 - v2.3000.1047882213
       '[data-testid="chatlist-header"] [data-testid="navbar-footer-section"] div | has:> img',
+      'div | has:> svg foreignObject [style*="--x-color: var(--WDS-components-profile-photo-content"]',
 
       //  Recent Search
-      '[data-testid="recent-search-item"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      // '[data-testid="recent-search-item"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      '[data-testid="recent-search-item"] > div:first-child',
 
       //  Me Tab Drawer Sidebar
       '[data-testid="me-tab-drawer"] [data-testid="menu-controller-focus-receiver"] img[src*="https://media"]',
@@ -29,7 +31,8 @@ window.WA_BLUR_RULES.push(
       '[data-testid="profile-drawer"] [data-testid="profile-pic-picker"]',
 
       //  Calls Tab Drawer
-      '[data-testid="calls-tab-drawer"] [data-testid="calls-drawer"] [id="pane-side"] [data-testid*="list-item-"] [data-testid*="chatlist-message-"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      // '[data-testid="calls-tab-drawer"] [data-testid="calls-drawer"] [id="pane-side"] [data-testid*="list-item-"] [data-testid*="chatlist-message-"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      '[data-testid="calls-tab-drawer"] [data-testid="calls-drawer"] [id="pane-side"] [data-testid*="list-item-"] [data-testid*="chatlist-message-"] > div:first-child',
 
       //  Status Sidebar
       '[data-testid="status-tab-drawer"] [data-testid="status-header-add-status"] img[src*="https://media"]',
@@ -40,11 +43,11 @@ window.WA_BLUR_RULES.push(
       '[data-testid="status-player-uie"] img[src*="https"]:not([data-testid="sticker-item"] *, [data-testid="status-emoji-bar"] *, [style*="position: absolute"] *)',
 
       //  Conversation Panel - Header
-      '[data-testid="conversation-header"] > div:first-child > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
+      '[data-testid="conversation-header"] > div:first-child > div:first-child',
       '[data-testid="conversation-header"] [data-testid="subgroup-switcher-button"] div | has:> div > img',
 
       //  Conversation Panel - Messages
-      'div[data-testid="group-chat-profile-picture"] | not-has:div[data-testid*="initial"]',
+      'div[data-testid="group-chat-profile-picture"]',
       '[data-testid="group-notification-context-card-photo"]',
       '[data-testid="conversation-panel-messages"] [data-testid="vcard-msg"] img',
       'div | has:> div > div > div > [data-testid="ptt-status"] | find:> div:first-child',
@@ -83,6 +86,13 @@ window.WA_BLUR_RULES.push(
         child: 'image',
       },
     ],
+    hoverHasTargets: [
+      //Update 12-11-2026 || For Conversation Panel - Header
+      {
+        blurTarget: '[data-testid="conversation-header"] > div:first-child > div:first-child',
+        hoverTrigger: 'button[data-testid="conversation-info-header-button"]'
+      }
+    ]
   },
   {
     key: 'blurAvatars',

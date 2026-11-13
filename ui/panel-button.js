@@ -97,11 +97,13 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
   }
 
   // 3. Tooltip helpers (reusable across all buttons and elements)
-  window.WAPanel.getTooltip = function () {
-    let tooltip = document.getElementById('wa-privacy-tooltip');
+  window.WAPanel.getTooltip = function (element) {
+    const id = element?.id ? `wa-privacy-tooltip-${element.id}` : 'wa-privacy-tooltip';
+    let tooltip = document.getElementById(id);
     if (!tooltip) {
       tooltip = document.createElement('div');
-      tooltip.id = 'wa-privacy-tooltip';
+      tooltip.id = id;
+      tooltip.className = 'wa-privacy-tooltip';
       tooltip.setAttribute('role', 'tooltip');
       tooltip.style.cssText = [
         'position:fixed',
@@ -136,7 +138,7 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
       ].join(';');
 
       const textSpan = document.createElement('span');
-      textSpan.id = 'wa-privacy-tooltip-text';
+      textSpan.className = 'wa-privacy-tooltip-text';
       textSpan.style.cssText = [
         'font-size:12px',
         'line-height:14px',
@@ -149,15 +151,19 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
       innerWrapper.appendChild(textSpan);
       tooltip.appendChild(innerWrapper);
       document.body.appendChild(tooltip);
+    } else if (!tooltip.classList.contains('wa-privacy-tooltip')) {
+      tooltip.classList.add('wa-privacy-tooltip');
     }
     return tooltip;
   };
 
   window.WAPanel.showTooltip = function (element, text) {
     if (!element) return;
-    const tooltip = window.WAPanel.getTooltip();
-    const textSpan = tooltip.querySelector('#wa-privacy-tooltip-text') || tooltip;
+    const tooltip = window.WAPanel.getTooltip(element);
+    const textSpan = tooltip.querySelector('.wa-privacy-tooltip-text') || tooltip;
     textSpan.textContent = text;
+    textSpan.removeAttribute('id');
+    textSpan.style.removeProperty('opacity');
 
     const isDark = document.body.classList.contains('dark') || document.documentElement.classList.contains('dark');
     const isRTL = window.WAPanel.checkRTL ? window.WAPanel.checkRTL() : false;
@@ -182,13 +188,21 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
     tooltip.style.opacity = '1';
   };
 
-  window.WAPanel.hideTooltip = function () {
-    const tooltip = document.getElementById('wa-privacy-tooltip');
-    if (tooltip) tooltip.style.opacity = '0';
+  window.WAPanel.hideTooltip = function (element) {
+    if (element) {
+      const id = element.id ? `wa-privacy-tooltip-${element.id}` : 'wa-privacy-tooltip';
+      const tooltip = document.getElementById(id);
+      if (tooltip) tooltip.style.opacity = '0';
+    } else {
+      const tooltips = document.querySelectorAll('.wa-privacy-tooltip, div[id^="wa-privacy-tooltip"]');
+      tooltips.forEach((t) => {
+        t.style.opacity = '0';
+      });
+    }
   };
 
   // Pre-initialize tooltip
-  window.WAPanel.getTooltip();
+  window.WAPanel.getTooltip(clbBtn);
 
   clbBtn.addEventListener('mouseenter', () => {
     if (window.WAPanel.isOpen) return;
@@ -196,7 +210,7 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
   });
 
   clbBtn.addEventListener('mouseleave', () => {
-    window.WAPanel.hideTooltip();
+    window.WAPanel.hideTooltip(clbBtn);
   });
 
   clbBtn.addEventListener('mousedown', (e) => {
@@ -230,6 +244,8 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
 window.WAPanel.removeMinimizerBtn = function () {
   const wrapper = document.getElementById('wa-sidebar-toggle-btn-wrapper');
   if (wrapper) wrapper.remove();
+  const minTooltip = document.getElementById('wa-privacy-tooltip-wa-sidebar-toggle-btn');
+  if (minTooltip) minTooltip.remove();
   window.WAPanel.minBtn = null;
   if (window.WAPanel.hideTooltip) window.WAPanel.hideTooltip();
 };
@@ -265,7 +281,7 @@ window.WAPanel.injectMinimizerBtn = function () {
   });
 
   minBtn.addEventListener('mouseleave', () => {
-    window.WAPanel.hideTooltip();
+    window.WAPanel.hideTooltip(minBtn);
   });
 
   minBtn.addEventListener('mousedown', (e) => {
@@ -289,6 +305,7 @@ window.WAPanel.injectMinimizerBtn = function () {
 
   customWrapper.parentElement.insertBefore(minimizerWrapper, customWrapper);
   window.WAPanel.minBtn = minBtn;
+  window.WAPanel.getTooltip(minBtn);
 
   if (window.WAMinimizer && window.WAMinimizer.updateButtonIcon) {
     window.WAMinimizer.updateButtonIcon(minBtn, window.WAMinimizer.isMinimized);

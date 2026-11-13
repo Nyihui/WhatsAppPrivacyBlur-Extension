@@ -4,9 +4,9 @@
 
 /* --- Transitions for Smooth Minimize / Expand --- */
 .wa-js-target-minimizer {
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    flex-basis 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: width var(--wa-transition-duration, 0.25s) cubic-bezier(0.4, 0, 0.2, 1),
+    flex-basis var(--wa-transition-duration, 0.25s) cubic-bezier(0.4, 0, 0.2, 1),
+    min-width var(--wa-transition-duration, 0.25s) cubic-bezier(0.4, 0, 0.2, 1) !important;
   overflow: hidden !important;
 }
 
@@ -26,5 +26,5 @@
   display: block;
   width: 24px;
   height: 24px;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--wa-transition-duration, 0.15s) cubic-bezier(0.4, 0, 0.2, 1);
 }

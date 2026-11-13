@@ -35,7 +35,10 @@ window.WA_BLUR_RULES.push({
     '[data-testid="newsletter-recommended-item"] > [data-testid="cell-frame-container"] > div > div:nth-child(2) > div:first-child',
     //  Conversation Panel - Header
     '[data-testid="conversation-info-header"] > div:first-child',
-    '[data-testid="conversation-info-header"] [data-testid="chat-subtitle"] | has:span',
+    // '[data-testid="conversation-info-header"] [data-testid="chat-subtitle"] | has:span',
+    //Update 12-11-2026 || For Conversation Panel - Header
+    // 'div[data-testid="conversation-info-header-content"] > div:first-child',
+    // 'div[data-testid="conversation-info-header-content"] [data-testid="chat-subtitle"] | has:span',
     //  Conversation Panel - Messages
     'div | has:> span[data-testid="author"]:not([data-testid="quoted-message"] *)',
     '[data-testid="vcard-msg"] > div:nth-child(2)',
@@ -58,4 +61,15 @@ window.WA_BLUR_RULES.push({
     //  Popup Members
     '[data-testid="contacts-modal"] [role="listitem"] [data-testid="cell-frame-container"] [data-testid="cell-frame-secondary"] > div:nth-child(2)',
   ],
+  hoverHasTargets: [
+    //Update 12-11-2026 || For Conversation Panel - Header
+    {
+      blurTarget: 'div[data-testid="conversation-info-header-content"] > div:first-child',
+      hoverTrigger: 'button[data-testid="conversation-info-header-button"]'
+    },
+    {
+      blurTarget: 'div[data-testid="conversation-info-header-content"] [data-testid="chat-subtitle"] | has:span',
+      hoverTrigger: 'button[data-testid="conversation-info-header-button"]'
+    }
+  ]
 });

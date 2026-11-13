@@ -19,10 +19,12 @@ window.WA_BLUR_RULES.push({
     '[data-testid="msg-notification-container"] div | has:> [data-testid="fmx-card-trust-signals"]',
     '[data-testid="msg-notification-container"] [data-testid*="subtype"]',
     '[data-testid="msg-notification-container"] [data-testid="pinned_message_system_message"]',
+    '[data-testid="msg-notification-container"] > div:has(false)',
     '[role="button"][aria-label="Close"] | up:1 | find:> div:nth-child(2) | has:span',
     '[data-testid="media-caption"]',
     'span[data-testid="selectable-text"] | closest:div | has:[data-testid="link-preview-container"]',
     'div | has:> [data-testid="quoted-message"]',
+    'div[data-testid="msg-notification-container"] | has:[data-testid="message-history-notice-message"]',
 
     //  Pinned Messages
     '[data-testid="conversation-panel-wrapper"] [data-testid="conversation-subheader"] > div:first-child > div:first-child > div:first-child > div:last-child',

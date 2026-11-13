@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.1.1
+- Fixed blur support for conversation header avatar, name, and subtitle.
+- Added blur support for message history notice in chat text.
+- Added blur support for the pictureless avatars in recent search, calls drawer, conversation header, and group chat messages.
+- Optimized DOM queries and selector pipeline with container gating and target caching.
+- Adjusted the custom tooltip mechanism to support isolated instances per button element.
+- Synced sidebar minimizer transition duration with panel animation settings.
+
 ## v3.0.0
 - Redesigned the privacy panel with a Quick Settings circular tile grid and master status cards.
 - Added dedicated adjustments drawer with privacy mode switcher (Blur vs. Redact) and fine-tuning sliders.
