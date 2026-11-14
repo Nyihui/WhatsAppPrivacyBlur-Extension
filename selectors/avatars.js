@@ -17,7 +17,10 @@ window.WA_BLUR_RULES.push(
       '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child div | has:> img',
       //  Update 18-06-2026 - v2.3000.1047882213
       '[data-testid="chatlist-header"] [data-testid="navbar-footer-section"] div | has:> img',
-      'div | has:> svg foreignObject [style*="--x-color: var(--WDS-components-profile-photo-content"]',
+      //  Update 15-11-2026 - v2.3000.1054643268
+      '[data-testid*="list-item-"] [data-testid="message-yourself-row"] > div:first-child div | has:> svg',
+      '[data-testid*="list-item-"] [data-testid="cell-frame-container"] > div:first-child div | has:> svg',
+      // 'div | has:> svg foreignObject [style*="--x-color: var(--WDS-components-profile-photo-content"] | find::not([data-testid="conversation-header-avatar"] *)',
 
       //  Recent Search
       // '[data-testid="recent-search-item"] > div:first-child | not-has:[data-testid="default-contact-refreshed"] | not-has:[data-testid="default-group-refreshed"]',
@@ -43,7 +46,6 @@ window.WA_BLUR_RULES.push(
       '[data-testid="status-player-uie"] img[src*="https"]:not([data-testid="sticker-item"] *, [data-testid="status-emoji-bar"] *, [style*="position: absolute"] *)',
 
       //  Conversation Panel - Header
-      '[data-testid="conversation-header"] > div:first-child > div:first-child',
       '[data-testid="conversation-header"] [data-testid="subgroup-switcher-button"] div | has:> div > img',
 
       //  Conversation Panel - Messages

@@ -101,4 +101,22 @@ window.WAPanel.applySettingsToPanel = function (shadow, settings) {
   const isRedacted = (privacyMode === 'redacted');
   if (blurSliderRow) blurSliderRow.classList.toggle('disabled', isRedacted);
   if (blurIntensityInput) blurIntensityInput.disabled = isRedacted;
+
+  const shieldShortcut = settings.shortcutToggleShield ?? window.WAPanel.DEFAULT_SETTINGS.shortcutToggleShield;
+  const shieldKbd = shadow.getElementById('shortcut-kbd-shield');
+  if (shieldKbd) {
+    const textEl = shieldKbd.querySelector('.qs-kbd-text');
+    if (textEl && !shieldKbd.classList.contains('is-listening')) {
+      textEl.textContent = shieldShortcut?.label || 'Alt + /';
+    }
+  }
+
+  const minimizerShortcut = settings.shortcutToggleMinimizer ?? window.WAPanel.DEFAULT_SETTINGS.shortcutToggleMinimizer;
+  const minimizerKbd = shadow.getElementById('shortcut-kbd-minimizer');
+  if (minimizerKbd) {
+    const textEl = minimizerKbd.querySelector('.qs-kbd-text');
+    if (textEl && !minimizerKbd.classList.contains('is-listening')) {
+      textEl.textContent = minimizerShortcut?.label || 'Alt + .';
+    }
+  }
 };

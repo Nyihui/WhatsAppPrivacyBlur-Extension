@@ -22,6 +22,95 @@ window.WAPanel.DEFAULT_SETTINGS = {
   unblurLastNCount: 3,
   privacyMode: 'blur',
   minimizerEnabled: true,
+  shortcutToggleShield: {
+    mode: 'combo',
+    altKey: true,
+    ctrlKey: false,
+    shiftKey: false,
+    metaKey: false,
+    code: 'Slash',
+    key: '/',
+    label: 'Alt + /'
+  },
+  shortcutToggleMinimizer: {
+    mode: 'combo',
+    altKey: true,
+    ctrlKey: false,
+    shiftKey: false,
+    metaKey: false,
+    code: 'Period',
+    key: '.',
+    label: 'Alt + .'
+  }
+};
+
+const chordState = {};
+
+window.WAPanel.isShortcutMatch = function (event, shortcut, targetId = 'default') {
+  if (!shortcut) return false;
+
+  const mode = shortcut.mode || (Array.isArray(shortcut.keys) && shortcut.keys.length > 1 ? 'chord' : 'combo');
+
+  // --- Sequential Chord Mode (e.g. G then B within 600ms) ---
+  if (mode === 'chord') {
+    const target = event.target;
+    if (target && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) {
+      return false;
+    }
+
+    if (!Array.isArray(shortcut.keys) || shortcut.keys.length < 2) return false;
+
+    const state = chordState[targetId] || { lastCode: null, time: 0 };
+    chordState[targetId] = state;
+
+    const now = Date.now();
+    const [firstCode, secondCode] = shortcut.keys;
+
+    if (state.lastCode === firstCode && (now - state.time < 600) && event.code.toLowerCase() === secondCode.toLowerCase()) {
+      state.lastCode = null;
+      state.time = 0;
+      return true;
+    }
+
+    if (event.code.toLowerCase() === firstCode.toLowerCase()) {
+      state.lastCode = firstCode;
+      state.time = now;
+      return false;
+    }
+
+    state.lastCode = null;
+    state.time = 0;
+    return false;
+  }
+
+  // --- Simultaneous Modifier + Key Mode (mode === 'combo') ---
+  if (!shortcut.code && !shortcut.key) return false;
+
+  const altMatches = Boolean(shortcut.altKey) === Boolean(event.altKey);
+  const ctrlMatches = Boolean(shortcut.ctrlKey) === Boolean(event.ctrlKey);
+  const shiftMatches = Boolean(shortcut.shiftKey) === Boolean(event.shiftKey);
+  const metaMatches = Boolean(shortcut.metaKey) === Boolean(event.metaKey);
+
+  if (!altMatches || !ctrlMatches || !shiftMatches || !metaMatches) return false;
+
+  // Never match when the key being pressed is the modifier itself
+  if (['ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'ShiftLeft', 'ShiftRight', 'MetaLeft', 'MetaRight'].includes(event.code)) {
+    return false;
+  }
+
+  const codeMatch = Boolean(shortcut.code && event.code && event.code.toLowerCase() === shortcut.code.toLowerCase());
+  const keyMatch = Boolean(shortcut.key && event.key && event.key.toLowerCase() === shortcut.key.toLowerCase());
+  if (!codeMatch && !keyMatch) return false;
+
+  const hasModifier = shortcut.altKey || shortcut.ctrlKey || shortcut.metaKey;
+  if (!hasModifier) {
+    const target = event.target;
+    if (target && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 /* --------------------------------------------------------------------------
@@ -531,15 +620,13 @@ chrome.storage.onChanged.addListener((_changes, areaName) => {
   }
 });
 
-// 3. Keyboard shortcut: Alt + / → toggle master shield
+// 3. Keyboard shortcut: Toggle master shield
 window.addEventListener('keydown', (event) => {
-  if (event.altKey && (event.key === '/' || event.code === 'Slash')) {
+  if (window.WAPanel?.isReassigning) return;
+  const shortcut = currentSettings?.shortcutToggleShield || window.WAPanel.DEFAULT_SETTINGS.shortcutToggleShield;
+  if (window.WAPanel?.isShortcutMatch(event, shortcut, 'shield')) {
     event.preventDefault();
-    chrome.storage.local.get(window.WAPanel.DEFAULT_SETTINGS, (settings) => {
-      const isEnabled = settings.enabled !== undefined ? settings.enabled : window.WAPanel.DEFAULT_SETTINGS.enabled;
-      chrome.storage.local.set({ enabled: !isEnabled }, () => {
-        // console.log(`[Privacy Blur] Shield toggled via Alt+/. New state: ${!isEnabled}`);
-      });
-    });
+    const isEnabled = currentSettings?.enabled !== undefined ? currentSettings.enabled : window.WAPanel.DEFAULT_SETTINGS.enabled;
+    chrome.storage.local.set({ enabled: !isEnabled });
   }
-});
+}, true);

@@ -33,12 +33,6 @@ window.WA_BLUR_RULES.push({
     '[data-testid="status-player-contact-name"]',
     //  Channel Sidebar
     '[data-testid="newsletter-recommended-item"] > [data-testid="cell-frame-container"] > div > div:nth-child(2) > div:first-child',
-    //  Conversation Panel - Header
-    '[data-testid="conversation-info-header"] > div:first-child',
-    // '[data-testid="conversation-info-header"] [data-testid="chat-subtitle"] | has:span',
-    //Update 12-11-2026 || For Conversation Panel - Header
-    // 'div[data-testid="conversation-info-header-content"] > div:first-child',
-    // 'div[data-testid="conversation-info-header-content"] [data-testid="chat-subtitle"] | has:span',
     //  Conversation Panel - Messages
     'div | has:> span[data-testid="author"]:not([data-testid="quoted-message"] *)',
     '[data-testid="vcard-msg"] > div:nth-child(2)',
@@ -46,7 +40,7 @@ window.WA_BLUR_RULES.push({
     'div | has:> [data-testid="reaction-count-header"] | find:> div:last-child [data-testid*="list-item-"] [data-testid="cell-frame-secondary"]',
 
     //  Right Sidebar - Chat Info Drawer
-    'span[data-testid*="contact-info-subtitle"] | up:5',
+    'span[data-testid*="contact-info-subtitle"] | up:4',
     '[data-testid="chat-info-drawer"] | has:[data-testid*="contact-info-subtitle"] | find:[data-testid="li-block"] > div:first-child > div:last-child',
     '[data-testid="chat-info-drawer"] | has:[data-testid*="contact-info-subtitle"] | find:[data-testid="li-report-spam"] > div:first-child > div:last-child',
     'span[data-testid*="group-info-drawer-subject-input-read-only"] | closest:div',

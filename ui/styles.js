@@ -217,6 +217,181 @@ window.WA_PANEL_STYLES = `
     font-weight: 600;
     color: var(--md-on-surface);
     line-height: 1.2;
+    transition: all 0.15s ease;
+  }
+
+  /* Shortcut Re-assignment */
+  .master-card-footer.has-reassign {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .master-card-footer.has-reassign.pulse-attention {
+    animation: footer-attention-pulse 0.7s ease-in-out 2;
+  }
+
+  @keyframes footer-attention-pulse {
+    0%, 100% {
+      background: rgba(0, 0, 0, 0.04);
+      border-top-color: rgba(33, 192, 99, 0.18);
+    }
+    50% {
+      background: rgba(33, 192, 99, 0.14);
+      border-top-color: var(--md-primary);
+    }
+  }
+
+  .master-shortcut-default {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .master-shortcut-hint {
+    display: none;
+    width: 100%;
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--md-primary);
+    line-height: 1.2;
+    padding: 2px 0;
+  }
+
+  /* Hover behavior only active when NOT listening */
+  .master-card:not(.is-reassigning) .master-card-footer.has-reassign:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  :host([data-theme="light"]) .master-card:not(.is-reassigning) .master-card-footer.has-reassign:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .master-card:not(.is-reassigning) .master-card-footer.has-reassign:hover .master-shortcut-default {
+    display: none;
+  }
+
+  .master-card:not(.is-reassigning) .master-card-footer.has-reassign:hover .master-shortcut-hint {
+    display: block;
+  }
+
+  /* Panel Blur while Listening for Key Combination */
+  .dashboard.panel-blur-listening > *:not(.master-row),
+  .dashboard.panel-blur-listening .master-card:not(.is-reassigning),
+  .dashboard.panel-blur-listening .is-reassigning .master-card-main {
+    filter: blur(3.5px);
+    opacity: 0.3;
+    pointer-events: none;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+  }
+
+  .master-card.is-reassigning .master-card-footer {
+    border-top-color: var(--md-primary);
+    background: rgba(33, 192, 99, 0.08);
+  }
+
+  .master-card.is-reassigning .master-shortcut-default {
+    display: none !important;
+  }
+
+  .master-card.is-reassigning .master-shortcut-hint {
+    display: block !important;
+    color: var(--md-primary);
+    font-weight: 600;
+  }
+
+  /* Confirmation Modal Overlay */
+  .shortcut-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: var(--radius-panel);
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .shortcut-modal-overlay.open {
+    display: flex;
+  }
+
+  .shortcut-modal {
+    background: var(--md-surface);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--radius-card);
+    box-shadow: var(--md-elev);
+    padding: 18px 16px 14px;
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .shortcut-modal-msg {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--md-on-surface);
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .shortcut-modal-msg .shortcut-combo-badge {
+    display: inline-block;
+    background: var(--md-surface-var);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--radius-btn);
+    padding: 2px 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--md-primary);
+  }
+
+  .shortcut-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .shortcut-modal-btn {
+    border: none;
+    border-radius: var(--radius-btn);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+  }
+
+  .shortcut-modal-btn.cancel {
+    background: var(--md-surface-var);
+    color: var(--md-on-s-var);
+    border: 1px solid var(--md-outline);
+  }
+
+  .shortcut-modal-btn.cancel:hover {
+    color: var(--md-on-surface);
+    border-color: var(--md-on-s-var);
+  }
+
+  .shortcut-modal-btn.confirm {
+    background: var(--md-primary);
+    color: var(--tile-icon-active);
+  }
+
+  .shortcut-modal-btn.confirm:hover {
+    opacity: 0.9;
   }
 
   /* Compact Mode Pill (Embedded in adjustments drawer header) */

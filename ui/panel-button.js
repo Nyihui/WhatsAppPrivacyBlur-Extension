@@ -93,7 +93,7 @@ window.WAPanel.injectChatlistBtn = function (panel, shadow) {
   // 2. Clear cloned SVG icon and prepare icon container
   const iconSpan = clbBtn.querySelector('span[aria-hidden="true"]') || clbBtn.querySelector('svg')?.parentElement;
   if (iconSpan) {
-    iconSpan.innerHTML = '';
+    iconSpan.replaceChildren();
   }
 
   // 3. Tooltip helpers (reusable across all buttons and elements)
@@ -272,7 +272,7 @@ window.WAPanel.injectMinimizerBtn = function () {
 
   const minIconSpan = minBtn.querySelector('span[aria-hidden="true"]') || minBtn.querySelector('svg')?.parentElement;
   if (minIconSpan) {
-    minIconSpan.innerHTML = '';
+    minIconSpan.replaceChildren();
   }
 
   minBtn.addEventListener('mouseenter', () => {

@@ -139,8 +139,21 @@
 
   // --- Initialization ---
   function initMinimizer() {
-    chrome.storage.local.get({ waMinimized: false, minimizerEnabled: true }, (data) => {
+    let minimizerShortcut = window.WAPanel?.DEFAULT_SETTINGS?.shortcutToggleMinimizer || {
+      altKey: true,
+      ctrlKey: false,
+      shiftKey: false,
+      metaKey: false,
+      code: 'Period',
+      key: '.',
+      label: 'Alt + .'
+    };
+
+    chrome.storage.local.get({ waMinimized: false, minimizerEnabled: true, shortcutToggleMinimizer: minimizerShortcut }, (data) => {
       window.WAMinimizer.isEnabled = data.minimizerEnabled !== false;
+      if (data.shortcutToggleMinimizer) {
+        minimizerShortcut = data.shortcutToggleMinimizer;
+      }
       if (window.WAMinimizer.isEnabled) {
         window.WAMinimizer.applyState(!!data.waMinimized);
       } else {
@@ -152,8 +165,13 @@
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && changes.minimizerEnabled !== undefined) {
-        window.WAMinimizer.setEnabled(changes.minimizerEnabled.newValue !== false);
+      if (area === 'local') {
+        if (changes.minimizerEnabled !== undefined) {
+          window.WAMinimizer.setEnabled(changes.minimizerEnabled.newValue !== false);
+        }
+        if (changes.shortcutToggleMinimizer !== undefined) {
+          minimizerShortcut = changes.shortcutToggleMinimizer.newValue || window.WAPanel?.DEFAULT_SETTINGS?.shortcutToggleMinimizer;
+        }
       }
     });
 
@@ -176,13 +194,19 @@
       }, 50);
     });
 
-    // Keyboard shortcut: Alt + . → toggle sidebar
+    // Keyboard shortcut: Toggle sidebar
     document.addEventListener('keydown', (e) => {
-      if (e.altKey && (e.key === '.' || e.code === 'Period')) {
+      if (window.WAPanel?.isReassigning) return;
+      const matchFn = window.WAPanel?.isShortcutMatch;
+      const isMatch = matchFn
+        ? matchFn(e, minimizerShortcut, 'minimizer')
+        : (e.altKey && (e.key === '.' || e.code === 'Period'));
+
+      if (isMatch) {
         e.preventDefault();
         window.WAMinimizer.toggle();
       }
-    });
+    }, true);
   }
 
   if (document.readyState === 'loading') {

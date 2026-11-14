@@ -51,9 +51,12 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
           <span class="slider round"></span>
         </label>
       </div>
-      <div class="master-card-footer">
-        <span class="master-shortcut-desc">Blur Toggle</span>
-        <kbd class="qs-kbd">Alt + /</kbd>
+      <div class="master-card-footer has-reassign" id="footer-shortcut-shield" role="button" tabindex="0" title="click to re-assign key">
+        <div class="master-shortcut-default">
+          <span class="master-shortcut-desc">Blur Toggle</span>
+          <kbd class="qs-kbd" id="shortcut-kbd-shield"><span class="qs-kbd-text">Alt + /</span></kbd>
+        </div>
+        <div class="master-shortcut-hint">click to re-assign key</div>
       </div>
     </div>
 
@@ -67,9 +70,12 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
           <span class="slider round"></span>
         </label>
       </div>
-      <div class="master-card-footer">
-        <span class="master-shortcut-desc">Minimize Toggle</span>
-        <kbd class="qs-kbd">Alt + .</kbd>
+      <div class="master-card-footer has-reassign" id="footer-shortcut-minimizer" role="button" tabindex="0" title="click to re-assign key">
+        <div class="master-shortcut-default">
+          <span class="master-shortcut-desc">Minimize Toggle</span>
+          <kbd class="qs-kbd" id="shortcut-kbd-minimizer"><span class="qs-kbd-text">Alt + .</span></kbd>
+        </div>
+        <div class="master-shortcut-hint">click to re-assign key</div>
       </div>
     </div>
   </div>
@@ -139,4 +145,13 @@ window.WA_PANEL_HTML = `<div class="dashboard" id="wa-dashboard">
     </div>
   </div>
 
+</div>
+<div class="shortcut-modal-overlay" id="shortcut-modal-overlay">
+  <div class="shortcut-modal">
+    <div class="shortcut-modal-msg" id="shortcut-modal-msg"></div>
+    <div class="shortcut-modal-actions">
+      <button type="button" class="shortcut-modal-btn cancel" id="shortcut-modal-cancel">Cancel</button>
+      <button type="button" class="shortcut-modal-btn confirm" id="shortcut-modal-confirm">Confirm</button>
+    </div>
+  </div>
 </div>`;

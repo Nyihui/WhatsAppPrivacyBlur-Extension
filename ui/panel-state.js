@@ -53,11 +53,20 @@ window.WAPanel.openPanel = function (panel, anchorRect, shadow) {
   window.WAPanel.positionPanel(panel, window.WAPanel.currentAnchorRect);
   panel.classList.add('open');
   if (window.WAPanel.updateCLBGlow) window.WAPanel.updateCLBGlow();
+  if (shadow) {
+    const footers = shadow.querySelectorAll('.master-card-footer.has-reassign');
+    footers.forEach((f) => {
+      f.classList.remove('pulse-attention');
+      void f.offsetWidth;
+      f.classList.add('pulse-attention');
+    });
+  }
   chrome.storage.local.get(window.WAPanel.DEFAULT_SETTINGS, (s) => window.WAPanel.applySettingsToPanel(shadow, s));
 };
 
 window.WAPanel.closePanel = function (panel) {
   window.WAPanel.isOpen = false;
+  if (window.WAPanel.cleanupReassign) window.WAPanel.cleanupReassign();
   const target = panel || window.WAPanel.panel;
   if (target) target.classList.remove('open');
   if (window.WAPanel.updateCLBGlow) window.WAPanel.updateCLBGlow();

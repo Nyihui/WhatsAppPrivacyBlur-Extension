@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.2.0
+- Added customizable keyboard shortcut re-assignment with support for key combinations and sequential chords.
+- Added attention pulse animation on shortcut cards when opening the settings panel.
+- Added blur support for SVG-based profile avatars in the chat list and "Message yourself" row.
+- Adjusted locator for contact subtitle in the Chat Info drawer.
+- Cleaned up obsolete conversation header selectors.
+
 ## v3.1.1
 - Fixed blur support for conversation header avatar, name, and subtitle.
 - Added blur support for message history notice in chat text.

@@ -159,9 +159,197 @@ window.WAPanel.mount = function() {
   const resetBtn = shadow.getElementById('panel-reset-btn');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
+      cleanupReassign();
       chrome.storage.local.set(window.WAPanel.DEFAULT_SETTINGS, () => {
         window.WAPanel.applySettingsToPanel(shadow, window.WAPanel.DEFAULT_SETTINGS);
       });
+    });
+  }
+
+  // --- Keyboard Shortcut Re-assignment Controller ---
+  const modalOverlay = shadow.getElementById('shortcut-modal-overlay');
+  const modalMsg = shadow.getElementById('shortcut-modal-msg');
+  const modalConfirmBtn = shadow.getElementById('shortcut-modal-confirm');
+  const modalCancelBtn = shadow.getElementById('shortcut-modal-cancel');
+  const dashboard = shadow.getElementById('wa-dashboard');
+
+  let activeReassign = null;
+  let pendingKeys = [];
+  let pendingShortcut = null;
+
+  function formatKeyName(e) {
+    if (['Control', 'ControlLeft', 'ControlRight'].includes(e.code) || e.key === 'Control') return 'Ctrl';
+    if (['Alt', 'AltLeft', 'AltRight'].includes(e.code) || e.key === 'Alt') return 'Alt';
+    if (['Shift', 'ShiftLeft', 'ShiftRight'].includes(e.code) || e.key === 'Shift') return 'Shift';
+    if (['Meta', 'MetaLeft', 'MetaRight', 'OSLeft', 'OSRight'].includes(e.code) || e.key === 'Meta') return 'Cmd';
+    if (e.code === 'Slash' || e.key === '/') return '/';
+    if (e.code === 'Period' || e.key === '.') return '.';
+    if (e.code === 'Space' || e.key === ' ') return 'Space';
+    if (e.code.startsWith('Key')) return e.code.slice(3).toUpperCase();
+    if (e.code.startsWith('Digit')) return e.code.slice(5);
+    return e.key.length === 1 ? e.key.toUpperCase() : e.key;
+  }
+
+  function cleanupReassign() {
+    window.removeEventListener('keydown', onReassignKeyDown, true);
+    window.WAPanel.isReassigning = false;
+    if (activeReassign) {
+      dashboard.classList.remove('panel-blur-listening');
+      activeReassign.cardEl?.classList.remove('is-reassigning');
+      if (activeReassign.hintEl) {
+        activeReassign.hintEl.textContent = 'click to re-assign key';
+      }
+      const textEl = activeReassign.kbdEl?.querySelector('.qs-kbd-text');
+      if (textEl && activeReassign.prevLabel) {
+        textEl.textContent = activeReassign.prevLabel;
+      }
+      activeReassign = null;
+    }
+    pendingKeys = [];
+    pendingShortcut = null;
+    if (modalOverlay) modalOverlay.classList.remove('open');
+  }
+  window.WAPanel.cleanupReassign = cleanupReassign;
+
+  function startReassign(settingKey, title, footerId, kbdId, cardId) {
+    cleanupReassign();
+
+    const footerEl = shadow.getElementById(footerId);
+    const kbdEl = shadow.getElementById(kbdId);
+    const cardEl = shadow.getElementById(cardId);
+    if (!footerEl || !kbdEl || !cardEl) return;
+
+    const textEl = kbdEl.querySelector('.qs-kbd-text');
+    const hintEl = footerEl.querySelector('.master-shortcut-hint');
+    const prevLabel = textEl?.textContent || (settingKey === 'shortcutToggleShield' ? 'Alt + /' : 'Alt + .');
+
+    activeReassign = {
+      key: settingKey,
+      title: title,
+      footerEl: footerEl,
+      kbdEl: kbdEl,
+      cardEl: cardEl,
+      hintEl: hintEl,
+      prevLabel: prevLabel
+    };
+    pendingKeys = [];
+    pendingShortcut = null;
+
+    window.WAPanel.isReassigning = true;
+    dashboard.classList.add('panel-blur-listening');
+    cardEl.classList.add('is-reassigning');
+    if (hintEl) {
+      hintEl.textContent = 'press combination key';
+    }
+
+    window.addEventListener('keydown', onReassignKeyDown, true);
+  }
+
+  function onReassignKeyDown(e) {
+    if (!activeReassign) return;
+
+    if (e.key === 'Escape' || e.code === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      cleanupReassign();
+      return;
+    }
+
+    if (e.repeat) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const name = formatKeyName(e);
+    if (!pendingKeys.some(k => k.code === e.code)) {
+      pendingKeys.push({
+        code: e.code,
+        key: e.key,
+        name: name,
+        altKey: e.altKey,
+        ctrlKey: e.ctrlKey,
+        shiftKey: e.shiftKey,
+        metaKey: e.metaKey
+      });
+    }
+
+    if (pendingKeys.length === 1) {
+      if (activeReassign.hintEl) activeReassign.hintEl.textContent = `${pendingKeys[0].name} + ...`;
+    } else if (pendingKeys.length >= 2) {
+      window.removeEventListener('keydown', onReassignKeyDown, true);
+
+      const label = `${pendingKeys[0].name} + ${pendingKeys[1].name}`;
+      if (activeReassign.hintEl) activeReassign.hintEl.textContent = label;
+
+      const modNames = ['Ctrl', 'Alt', 'Shift', 'Cmd'];
+      const nonModKey = pendingKeys.find(k => !modNames.includes(k.name));
+      const hasModifier = pendingKeys.some(k => modNames.includes(k.name));
+
+      if (hasModifier && nonModKey) {
+        // Mode 1: Simultaneous Modifier + Trigger Key
+        pendingShortcut = {
+          mode: 'combo',
+          altKey: pendingKeys.some(k => k.name === 'Alt' || k.altKey),
+          ctrlKey: pendingKeys.some(k => k.name === 'Ctrl' || k.ctrlKey),
+          shiftKey: pendingKeys.some(k => k.name === 'Shift' || k.shiftKey),
+          metaKey: pendingKeys.some(k => k.name === 'Cmd' || k.metaKey),
+          code: nonModKey.code,
+          key: nonModKey.key,
+          label: label
+        };
+      } else {
+        // Mode 2: Sequential Chord (two normal keys, or two modifiers)
+        pendingShortcut = {
+          mode: 'chord',
+          keys: [pendingKeys[0].code, pendingKeys[1].code],
+          label: label
+        };
+      }
+
+      if (modalMsg) {
+        const textNode = document.createTextNode(`combo key for ${activeReassign.title} = `);
+        const badge = document.createElement('span');
+        badge.className = 'shortcut-combo-badge';
+        badge.textContent = label;
+        modalMsg.replaceChildren(textNode, badge);
+      }
+      if (modalOverlay) {
+        modalOverlay.classList.add('open');
+      }
+    }
+  }
+
+  if (modalConfirmBtn) {
+    modalConfirmBtn.addEventListener('click', () => {
+      if (activeReassign && pendingShortcut) {
+        const key = activeReassign.key;
+        const shortcut = pendingShortcut;
+        activeReassign.prevLabel = shortcut.label;
+        chrome.storage.local.set({ [key]: shortcut }, () => {
+          cleanupReassign();
+        });
+      } else {
+        cleanupReassign();
+      }
+    });
+  }
+
+  if (modalCancelBtn) {
+    modalCancelBtn.addEventListener('click', () => {
+      cleanupReassign();
+    });
+  }
+
+  const shieldFooter = shadow.getElementById('footer-shortcut-shield');
+  if (shieldFooter) {
+    shieldFooter.addEventListener('click', () => {
+      startReassign('shortcutToggleShield', 'blur toggle', 'footer-shortcut-shield', 'shortcut-kbd-shield', 'card-master-status');
+    });
+  }
+
+  const minimizerFooter = shadow.getElementById('footer-shortcut-minimizer');
+  if (minimizerFooter) {
+    minimizerFooter.addEventListener('click', () => {
+      startReassign('shortcutToggleMinimizer', 'sidebar minimizer', 'footer-shortcut-minimizer', 'shortcut-kbd-minimizer', 'card-master-minimizer');
     });
   }
 
